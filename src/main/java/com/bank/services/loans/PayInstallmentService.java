@@ -63,7 +63,7 @@ public class PayInstallmentService {
 
         _installmentRepository.saveAll(installments);
 
-        var currency = installments.getFirst().getCurrency();
+        var currency = installments.get(0).getCurrency();
         var bankAccountId = _accountService.loadBankAccount(currency).getId();
 
         var transferDto = new TransferDto(sumInstallmentsAmount,
