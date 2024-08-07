@@ -7,7 +7,6 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.util.ArrayList;
-import java.util.List;
 
 @AllArgsConstructor
 @NoArgsConstructor
