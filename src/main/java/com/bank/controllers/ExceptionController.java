@@ -1,5 +1,6 @@
 package com.bank.controllers;
 
+import com.bank.exceptions.DomainException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.RequestDispatcher;
 import org.springframework.boot.web.servlet.error.ErrorController;
@@ -16,33 +17,40 @@ public class ExceptionController implements ErrorController {
     @RequestMapping("/error")
     @ResponseBody
     public ResponseEntity<Object> handleError(HttpServletRequest request) {
-        var status = request.getAttribute(RequestDispatcher.ERROR_STATUS_CODE);
         var body = new HashMap<String, Object>();
-        var httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
-
-        if (status != null) {
-            var statusCode = Integer.parseInt(status.toString());
-            body.put("status", statusCode);
-
-            if (statusCode == HttpStatus.NOT_FOUND.value()) {
-                httpStatus = HttpStatus.NOT_FOUND;
-                body.put("error", "Not Found");
-                body.put("message", "The requested resource was not found.");
-            } else if (statusCode == HttpStatus.INTERNAL_SERVER_ERROR.value()) {
-                httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
-                body.put("error", "Internal Server Error");
-                body.put("message", "An internal server error occurred.");
-            } else if (statusCode == HttpStatus.FORBIDDEN.value()) {
-                httpStatus = HttpStatus.FORBIDDEN;
-                body.put("error", "Forbidden");
-                body.put("message", "You don't have permission to access this resource.");
-            } else {
-                httpStatus = HttpStatus.valueOf(statusCode);
-                body.put("error", httpStatus.getReasonPhrase());
-                body.put("message", "An unexpected error occurred.");
-            }
+        var status = request.getAttribute(RequestDispatcher.ERROR_STATUS_CODE);
+        if(status == null) {
+            body.put("error", "Unknown Error");
+            body.put("message", "An unknown error occurred.");
+            return new ResponseEntity<>(body, HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
-        return new ResponseEntity<>(body, httpStatus);
+        var statusCode = Integer.parseInt(status.toString());
+        body.put("status", statusCode);
+
+        if (statusCode == HttpStatus.NOT_FOUND.value()) {
+            body.put("error", "Not Found");
+            body.put("message", "The requested resource was not found.");
+            return new ResponseEntity<>(body, HttpStatus.NOT_FOUND);
+        } else if (statusCode == HttpStatus.FORBIDDEN.value()) {
+            body.put("error", "Forbidden");
+            body.put("message", "You don't have permission to access this resource.");
+            return new ResponseEntity<>(body, HttpStatus.FORBIDDEN);
+        } else if (statusCode == HttpStatus.INTERNAL_SERVER_ERROR.value()) {
+            var throwable = (Throwable) request.getAttribute(RequestDispatcher.ERROR_EXCEPTION);
+            if (throwable != null && throwable.getCause() instanceof DomainException) {
+                body.put("error", "Business Error");
+                body.put("message", throwable.getCause().getMessage());
+            }
+            else {
+                body.put("error", "Internal Server Error");
+                body.put("message", "An internal server error occurred.");
+            }
+            return new ResponseEntity<>(body, HttpStatus.INTERNAL_SERVER_ERROR);
+        } else {
+            body.put("error", HttpStatus.valueOf(statusCode).getReasonPhrase());
+            body.put("message", "An unexpected error occurred.");
+            return new ResponseEntity<>(body, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 }

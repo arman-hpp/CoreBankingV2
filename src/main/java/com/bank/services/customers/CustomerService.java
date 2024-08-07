@@ -1,5 +1,6 @@
 package com.bank.services.customers;
 
+import com.bank.dtos.filters.FilterInfoDto;
 import com.bank.dtos.customers.CustomerDto;
 import com.bank.exceptions.DomainException;
 import com.bank.models.BaseFilter;
@@ -51,14 +52,7 @@ public class CustomerService {
         var pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "Id"));
         var customers = _customerRepository.findAll(pageable);
 
-        return customers.map(product -> _modelMapper.map(product, CustomerDto.class));
-    }
-
-    public Page<CustomerDto> searchCustomers(Long customerId, int page, int size) {
-        var pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "Id"));
-        var customers = _customerRepository.findById(customerId, pageable);
-
-        return customers.map(product -> _modelMapper.map(product, CustomerDto.class));
+        return customers.map(customer -> _modelMapper.map(customer, CustomerDto.class));
     }
 
     @Cacheable(value = "customer", key = "#customerId")
@@ -121,9 +115,16 @@ public class CustomerService {
         }
     }
 
-    public Page<CustomerDto> loadCustomerByFilter(List<BaseFilter> filterList, int page, int size) {
-        var pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "Id"));
-        var spec = new FilterSpecification<Customer>(filterList);
+    public Page<CustomerDto> loadCustomerByFilter(FilterInfoDto filterInfo) {
+        var pageable = PageRequest.of(
+                filterInfo.getFilterPage().getPage(),
+                filterInfo.getFilterPage().getSize(),
+                Sort.by(filterInfo.getFilterSort().getDirection(),
+                        filterInfo.getFilterSort().getProps()));
+        var filtersList = filterInfo.getFilters().stream()
+                .map(f -> _modelMapper.map(f, BaseFilter.class))
+                .toList();
+        var spec = new FilterSpecification<Customer>(filtersList);
         var customers = _customerRepository.findAll(spec, pageable);
         return customers.map(customer -> _modelMapper.map(customer, CustomerDto.class));
     }
