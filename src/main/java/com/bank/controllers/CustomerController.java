@@ -3,7 +3,6 @@ package com.bank.controllers;
 import com.bank.dtos.PagedResponseDto;
 import com.bank.dtos.filters.FilterInfoDto;
 import com.bank.dtos.customers.CustomerDto;
-import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
 import com.bank.services.customers.CustomerService;
 
@@ -39,7 +38,7 @@ public class CustomerController {
     }
 
     @PostMapping("/filter")
-    public Page<CustomerDto> filterCustomers(@RequestBody FilterInfoDto filterInfo) {
+    public PagedResponseDto<CustomerDto> filterCustomers(@RequestBody FilterInfoDto filterInfo) {
         return _customerService.loadCustomerByFilter(filterInfo);
     }
 }

@@ -14,7 +14,6 @@ import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
 import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
@@ -35,8 +34,8 @@ public class CustomerService {
     public PagedResponseDto<CustomerDto> loadCustomers(int page, int size) {
         var pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "Id"));
         var customers = _customerRepository.findAll(pageable);
-
-        return new PagedResponseDto<>(customers.map(customer -> _modelMapper.map(customer, CustomerDto.class)));
+        var results = customers.map(customer -> _modelMapper.map(customer, CustomerDto.class));
+        return new PagedResponseDto<>(results);
     }
 
     @Cacheable(value = "customer", key = "#customerId")
@@ -99,7 +98,7 @@ public class CustomerService {
         }
     }
 
-    public Page<CustomerDto> loadCustomerByFilter(FilterInfoDto filterInfo) {
+    public PagedResponseDto<CustomerDto> loadCustomerByFilter(FilterInfoDto filterInfo) {
         var pageable = PageRequest.of(
                 filterInfo.getFilterPage().getPage(),
                 filterInfo.getFilterPage().getSize(),
@@ -111,6 +110,7 @@ public class CustomerService {
                 .toList();
         var spec = new FilterSpecification<Customer>(filtersList);
         var customers = _customerRepository.findAll(spec, pageable);
-        return customers.map(customer -> _modelMapper.map(customer, CustomerDto.class));
+        var results = customers.map(customer -> _modelMapper.map(customer, CustomerDto.class));
+        return new PagedResponseDto<>(results);
     }
 }
