@@ -1,4 +1,4 @@
-package com.bank.enums;
+package com.bank.enums.filters;
 
 public enum FilterComparators {
     EQUAL,

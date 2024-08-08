@@ -1,6 +1,7 @@
-package com.bank.models;
+package com.bank.models.filters;
 
-import com.bank.enums.FilterComparators;
+import com.bank.enums.filters.FilterComparators;
+import com.bank.models.BaseEntity;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Predicate;
@@ -21,7 +22,7 @@ public class FilterSpecification<T extends BaseEntity> implements Specification<
     }
 
     @Override
-    public Predicate toPredicate(@NotNull Root<T> root, @NotNull CriteriaQuery<?> query, @NotNull CriteriaBuilder criteriaBuilder) {
+    public Predicate toPredicate(@NotNull Root<T> root, CriteriaQuery<?> query, @NotNull CriteriaBuilder criteriaBuilder) {
         var predicates = getPredicateList(root, criteriaBuilder);
         return criteriaBuilder.and(predicates);
     }

@@ -1,15 +1,14 @@
 package com.bank.services.customers;
 
+import com.bank.dtos.PagedResponseDto;
 import com.bank.dtos.filters.FilterInfoDto;
 import com.bank.dtos.customers.CustomerDto;
 import com.bank.exceptions.DomainException;
-import com.bank.models.BaseFilter;
-import com.bank.models.FilterSpecification;
+import com.bank.models.filters.BaseFilter;
+import com.bank.models.filters.FilterSpecification;
 import com.bank.models.customers.Customer;
 import com.bank.repos.customers.CustomerRepository;
 import org.modelmapper.ModelMapper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
@@ -20,39 +19,24 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
-
 @Service
 public class CustomerService {
     private final CustomerRepository _customerRepository;
     private final ModelMapper _modelMapper;
 
-    private static final Logger log = LoggerFactory.getLogger(CustomerService.class);
+    //private static final Logger log = LoggerFactory.getLogger(CustomerService.class);
 
     public CustomerService(CustomerRepository customerRepository, ModelMapper modelMapper) {
         _customerRepository = customerRepository;
         _modelMapper = modelMapper;
     }
 
-    @Cacheable("customers")
-    public List<CustomerDto> loadCustomers() {
-        log.info("loadCustomers called");
-
-        var customers = _customerRepository.findAllByOrderByIdDesc();
-        var customerDtoList = new ArrayList<CustomerDto>();
-        for (var customer : customers) {
-            customerDtoList.add(_modelMapper.map(customer, CustomerDto.class));
-        }
-
-        return customerDtoList;
-    }
-
-    public Page<CustomerDto> loadCustomers(int page, int size) {
+    @Cacheable(value = "customers", key="'customers-page-'+#page + '-' + #size")
+    public PagedResponseDto<CustomerDto> loadCustomers(int page, int size) {
         var pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "Id"));
         var customers = _customerRepository.findAll(pageable);
 
-        return customers.map(customer -> _modelMapper.map(customer, CustomerDto.class));
+        return new PagedResponseDto<>(customers.map(customer -> _modelMapper.map(customer, CustomerDto.class)));
     }
 
     @Cacheable(value = "customer", key = "#customerId")
@@ -120,7 +104,8 @@ public class CustomerService {
                 filterInfo.getFilterPage().getPage(),
                 filterInfo.getFilterPage().getSize(),
                 Sort.by(filterInfo.getFilterSort().getDirection(),
-                        filterInfo.getFilterSort().getProps()));
+                        filterInfo.getFilterSort().getProps())
+        );
         var filtersList = filterInfo.getFilters().stream()
                 .map(f -> _modelMapper.map(f, BaseFilter.class))
                 .toList();

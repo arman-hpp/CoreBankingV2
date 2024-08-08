@@ -1,7 +1,7 @@
 package com.bank.dtos.filters;
 
 import com.bank.dtos.BaseDto;
-import com.bank.enums.FilterComparators;
+import com.bank.enums.filters.FilterComparators;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

@@ -1,5 +1,6 @@
 package com.bank.controllers;
 
+import com.bank.dtos.PagedResponseDto;
 import com.bank.dtos.filters.FilterInfoDto;
 import com.bank.dtos.customers.CustomerDto;
 import org.springframework.data.domain.Page;
@@ -16,7 +17,7 @@ public class CustomerController {
     }
 
     @GetMapping("/")
-    public Page<CustomerDto> getAllCustomers(
+    public PagedResponseDto<CustomerDto> getAllCustomers(
             @RequestParam(defaultValue = "0") Integer page,
             @RequestParam(defaultValue = "10") Integer size) {
         return _customerService.loadCustomers(page, size);

@@ -1,6 +1,6 @@
-package com.bank.models;
+package com.bank.models.filters;
 
-import com.bank.enums.FilterComparators;
+import com.bank.enums.filters.FilterComparators;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
