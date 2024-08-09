@@ -25,9 +25,4 @@ public class ApplicationBeanConfiguration {
     public ILoanValidator loanValidator() {
         return new DefaultLoanValidator();
     }
-
-//    @Bean
-//    public IExporterFactory exporterFactory() {
-//        return new ExporterFactory();
-//    }
 }
