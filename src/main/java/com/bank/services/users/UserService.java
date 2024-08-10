@@ -11,7 +11,6 @@ import com.bank.exceptions.DomainException;
 import com.bank.models.users.User;
 import com.bank.repos.users.UserRepository;
 import org.modelmapper.ModelMapper;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -52,7 +51,6 @@ public class UserService  {
         return _modelMapper.map(user, UserDto.class);
     }
 
-    @Cacheable(value = "users", key="'users-page-'+#page + '-' + #size")
     public PagedResponseDto<UserDto> loadUsers(int page, int size) {
         var pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "Id"));
         var users = _userRepository.findAll(pageable);

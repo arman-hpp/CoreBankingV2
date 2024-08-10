@@ -18,23 +18,23 @@ public class AuthenticationController {
         _userService = userService;
     }
 
-    @GetMapping("/me")
+    @GetMapping({"/","/me"})
     public UserDto getCurrentUser() {
         return _authenticationService.loadCurrentUser();
     }
 
     @PostMapping("/login")
-    public UserLoginOutputDto authenticate(@RequestBody UserLoginInputDto input) {
+    public UserLoginOutputDto login(@RequestBody UserLoginInputDto input) {
         return _authenticationService.authenticate(input);
     }
 
     @PostMapping("/register")
-    public UserDto addOrEditUser(@RequestBody UserRegisterInputDto input) {
+    public UserDto register(@RequestBody UserRegisterInputDto input) {
         return _userService.register(input);
     }
 
     @PostMapping("/change_password")
-    public void changePassword(@RequestBody UserChangePasswordInputDto input) {
+    public void changeUserPassword(@RequestBody UserChangePasswordInputDto input) {
         var userId = _authenticationService.loadCurrentUserId().orElse(null);
         if(userId == null) {
             throw new DomainException("error.auth.credentials.invalid");
@@ -43,6 +43,4 @@ public class AuthenticationController {
         input.setId(userId);
         _userService.changePassword(input);
     }
-
-
 }
