@@ -1,5 +1,6 @@
 package com.bank.services.users;
 
+import com.bank.dtos.PagedResponseDto;
 import com.bank.dtos.users.UserChangePasswordInputDto;
 import com.bank.dtos.users.UserDto;
 import com.bank.dtos.users.UserLoginInputDto;
@@ -10,14 +11,15 @@ import com.bank.exceptions.DomainException;
 import com.bank.models.users.User;
 import com.bank.repos.users.UserRepository;
 import org.modelmapper.ModelMapper;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Objects;
 
 @SuppressWarnings("unused")
@@ -50,14 +52,12 @@ public class UserService  {
         return _modelMapper.map(user, UserDto.class);
     }
 
-    public List<UserDto> loadUsers() {
-        var users = _userRepository.findAllByOrderByIdDesc();
-        var userDtoList = new ArrayList<UserDto>();
-        for(var user : users) {
-            userDtoList.add(_modelMapper.map(user, UserDto.class));
-        }
-
-        return userDtoList;
+    @Cacheable(value = "users", key="'users-page-'+#page + '-' + #size")
+    public PagedResponseDto<UserDto> loadUsers(int page, int size) {
+        var pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "Id"));
+        var users = _userRepository.findAll(pageable);
+        var results = users.map(user -> _modelMapper.map(user, UserDto.class));
+        return new PagedResponseDto<>(results);
     }
 
     public void removeUser(Long userId) {
@@ -68,23 +68,25 @@ public class UserService  {
         _userRepository.delete(user);
     }
 
-    public void editUser(UserDto userDto) {
+    public UserDto editUser(UserDto userDto) {
         var user = _userRepository.findById(userDto.getId()).orElse(null);
         if(user == null)
             throw new DomainException("error.auth.notFound");
 
         _modelMapper.map(userDto, user);
         _userRepository.save(user);
+
+        return userDto;
     }
 
-    public void addOrEditUser(UserDto userDto) {
+    public UserDto addOrEditUser(UserDto userDto) {
         if(userDto.getId()  == null || userDto.getId() <= 0) {
-            register(
+           return register(
                     new UserRegisterInputDto(userDto.getUsername(), userDto.getPassword(),
                             userDto.getPassword(), true));
         }
         else {
-            editUser(userDto);
+           return editUser(userDto);
         }
     }
 
@@ -97,7 +99,7 @@ public class UserService  {
             throw new DomainException("error.auth.credentials.invalid");
     }
 
-    public void register(UserRegisterInputDto userRegisterInputDto) {
+    public UserDto register(UserRegisterInputDto userRegisterInputDto) {
         if(_userRepository.findByUsername(userRegisterInputDto.getUsername()).orElse(null) != null)
             throw new DomainException("error.auth.username.duplicate");
 
@@ -112,6 +114,8 @@ public class UserService  {
         user.setLastPasswordChangedDate(LocalDateTime.now());
 
         _userRepository.save(user);
+
+        return _modelMapper.map(user, UserDto.class);
     }
 
     public void changePassword(UserChangePasswordInputDto userChangePasswordInputDto) {
