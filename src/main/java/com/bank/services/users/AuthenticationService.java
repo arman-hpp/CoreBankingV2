@@ -3,6 +3,7 @@ package com.bank.services.users;
 import com.bank.dtos.users.UserLoginInputDto;
 import com.bank.dtos.users.UserLoginOutputDto;
 import com.bank.enums.users.UserTypes;
+import com.bank.exceptions.DomainException;
 import com.bank.models.users.User;
 import com.bank.repos.users.UserRepository;
 import com.bank.dtos.users.UserDto;
@@ -10,6 +11,7 @@ import org.modelmapper.ModelMapper;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
@@ -35,22 +37,29 @@ public class AuthenticationService  {
     }
 
     public UserLoginOutputDto authenticate(UserLoginInputDto input) {
-        var authentication = _authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(input.getUsername(), input.getPassword())
-        );
+        try {
+            var authentication = _authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(input.getUsername(), input.getPassword())
+            );
 
-        var principal = authentication.getPrincipal();
-        if (principal == null) {
-            return null;
+            var principal = authentication.getPrincipal();
+            if (principal == null) {
+                throw new DomainException("error.auth.credentials.invalid");
+            }
+
+            if (!(principal instanceof User user)) {
+                throw new DomainException("error.auth.credentials.invalid");
+            }
+
+            logSuccessfulLogin(user.getUsername());
+
+            var jwtToken = _jwtService.generateToken(user);
+
+            return new UserLoginOutputDto(input.getUsername(), jwtToken);
+        } catch (AuthenticationException ex) {
+            logFailedLogin(input.getUsername());
+            throw new DomainException("error.auth.credentials.invalid");
         }
-
-        if (!(principal instanceof User user)) {
-            return null;
-        }
-
-        var jwtToken = _jwtService.generateToken(user);
-
-        return new UserLoginOutputDto(input.getUsername(), jwtToken);
     }
 
     public void logFailedLogin(String username) {
