@@ -1,15 +1,16 @@
 package com.bank.services.users;
 
+import com.bank.dtos.users.UserLoginInputDto;
+import com.bank.dtos.users.UserLoginOutputDto;
 import com.bank.enums.users.UserTypes;
 import com.bank.models.users.User;
 import com.bank.repos.users.UserRepository;
 import com.bank.dtos.users.UserDto;
 import org.modelmapper.ModelMapper;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -17,23 +18,39 @@ import java.util.Optional;
 
 @SuppressWarnings("unused")
 @Service
-public class AuthenticationService implements UserDetailsService {
+public class AuthenticationService  {
     private final UserRepository _userRepository;
     private final ModelMapper _modelMapper;
+    private final JwtService _jwtService;
+    private final AuthenticationManager _authenticationManager;
 
-    public AuthenticationService(UserRepository userRepository, ModelMapper modelMapper) {
+    public AuthenticationService(UserRepository userRepository,
+                                 ModelMapper modelMapper,
+                                 JwtService jwtService,
+                                 AuthenticationManager authenticationManager) {
         _userRepository = userRepository;
         _modelMapper = modelMapper;
+        _jwtService = jwtService;
+        _authenticationManager = authenticationManager;
     }
 
-    @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        var user = _userRepository.findByUsername(username).orElse(null);
-        if (user == null) {
-            throw new UsernameNotFoundException("The user cannot be found");
+    public UserLoginOutputDto authenticate(UserLoginInputDto input) {
+        var authentication = _authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(input.getUsername(), input.getPassword())
+        );
+
+        var principal = authentication.getPrincipal();
+        if (principal == null) {
+            return null;
         }
 
-        return user;
+        if (!(principal instanceof User user)) {
+            return null;
+        }
+
+        var jwtToken = _jwtService.generateToken(user);
+
+        return new UserLoginOutputDto(input.getUsername(), jwtToken);
     }
 
     public void logFailedLogin(String username) {

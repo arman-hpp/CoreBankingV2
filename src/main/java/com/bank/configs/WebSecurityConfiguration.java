@@ -1,17 +1,11 @@
 package com.bank.configs;
 
-import com.bank.services.users.AuthenticationService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
-import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
-import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
@@ -23,31 +17,13 @@ import java.util.List;
 @Configuration
 @EnableWebSecurity
 public class WebSecurityConfiguration {
-    public final AuthenticationService _authenticationService;
     public final JwtAuthenticationFilter _jwtAuthenticationFilter;
+    private final AuthenticationProvider _authenticationProvider;
 
-    public WebSecurityConfiguration(AuthenticationService authenticationService,
-                                    JwtAuthenticationFilter jwtAuthenticationFilter) {
-        _authenticationService = authenticationService;
+    public WebSecurityConfiguration(JwtAuthenticationFilter jwtAuthenticationFilter,
+                                    AuthenticationProvider authenticationProvider) {
         _jwtAuthenticationFilter = jwtAuthenticationFilter;
-    }
-
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
-    }
-
-    @Bean
-    public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
-        return config.getAuthenticationManager();
-    }
-
-    @Bean
-    public AuthenticationProvider authenticationProvider() {
-        DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
-        authProvider.setUserDetailsService(_authenticationService);
-        authProvider.setPasswordEncoder(passwordEncoder());
-        return authProvider;
+        _authenticationProvider = authenticationProvider;
     }
 
     @Bean
@@ -60,8 +36,7 @@ public class WebSecurityConfiguration {
                         .requestMatchers("/error/**").permitAll()
                         .anyRequest().authenticated()
                 )
-                .userDetailsService(_authenticationService)
-                .authenticationProvider(authenticationProvider());
+                .authenticationProvider(_authenticationProvider);
 
         http.addFilterBefore(_jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();
@@ -78,5 +53,4 @@ public class WebSecurityConfiguration {
         source.registerCorsConfiguration("/**",configuration);
         return source;
     }
-
 }

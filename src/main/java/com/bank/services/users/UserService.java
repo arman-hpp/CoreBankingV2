@@ -1,15 +1,17 @@
 package com.bank.services.users;
 
-import com.bank.dtos.users.UserLoginInputDto;
-import com.bank.enums.users.UserState;
-import com.bank.enums.users.UserTypes;
-import com.bank.models.users.User;
-import com.bank.repos.users.UserRepository;
 import com.bank.dtos.users.UserChangePasswordInputDto;
 import com.bank.dtos.users.UserDto;
+import com.bank.dtos.users.UserLoginInputDto;
 import com.bank.dtos.users.UserRegisterInputDto;
+import com.bank.enums.users.UserState;
+import com.bank.enums.users.UserTypes;
 import com.bank.exceptions.DomainException;
+import com.bank.models.users.User;
+import com.bank.repos.users.UserRepository;
 import org.modelmapper.ModelMapper;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -20,7 +22,7 @@ import java.util.Objects;
 
 @SuppressWarnings("unused")
 @Service
-public class UserService {
+public class UserService  {
     private final UserRepository _userRepository;
     private final ModelMapper _modelMapper;
     private final PasswordEncoder _passwordEncoder;
@@ -29,6 +31,15 @@ public class UserService {
         _userRepository = userRepository;
         _modelMapper = modelMapper;
         _passwordEncoder = passwordEncoder;
+    }
+
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        var user = _userRepository.findByUsername(username).orElse(null);
+        if (user == null) {
+            throw new UsernameNotFoundException("The user cannot be found");
+        }
+
+        return user;
     }
 
     public UserDto loadUser(Long userId) {
