@@ -53,16 +53,17 @@ public class AuthenticationService  {
 
             logSuccessfulLogin(user.getUsername());
 
-            var jwtToken = _jwtService.generateToken(user);
+            var accessToken = _jwtService.generateAccessToken(user);
+            var refreshToken = _jwtService.generateRefreshToken(user);
 
-            return new UserLoginOutputDto(input.getUsername(), jwtToken);
+            return new UserLoginOutputDto(input.getUsername(), accessToken, refreshToken);
         } catch (AuthenticationException ex) {
             logFailedLogin(input.getUsername());
             throw new DomainException("error.auth.credentials.invalid");
         }
     }
 
-    public void logFailedLogin(String username) {
+    private void logFailedLogin(String username) {
         try {
             var user = _userRepository.findByUsername(username).orElse(null);
             if (user == null) {
@@ -87,7 +88,7 @@ public class AuthenticationService  {
         }
     }
 
-    public void logSuccessfulLogin(String username) {
+    private void logSuccessfulLogin(String username) {
         try {
             var user = _userRepository.findByUsername(username).orElse(null);
             if (user == null) {

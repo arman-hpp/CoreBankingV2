@@ -9,5 +9,6 @@ import lombok.*;
 @Setter
 public class UserLoginOutputDto extends BaseDto {
     public String username;
-    public String token;
+    public String accessToken;
+    public String refreshToken;
 }
