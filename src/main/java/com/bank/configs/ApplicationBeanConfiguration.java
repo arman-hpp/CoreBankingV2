@@ -1,5 +1,7 @@
 package com.bank.configs;
 
+import com.bank.exporters.ExporterFactory;
+import com.bank.exporters.IExporterFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import com.bank.services.loans.AmortizationLoanCalculator;
@@ -24,5 +26,10 @@ public class ApplicationBeanConfiguration {
     @Bean
     public ILoanValidator loanValidator() {
         return new DefaultLoanValidator();
+    }
+
+    @Bean
+    public IExporterFactory exporterFactory() {
+        return new ExporterFactory();
     }
 }
