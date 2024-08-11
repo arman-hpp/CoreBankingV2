@@ -17,9 +17,9 @@ import java.util.Optional;
 public interface AccountRepository extends BaseRepository<Account, Long> {
     Optional<Account> findByAccountTypeAndCurrency(AccountTypes accountType, Currencies currency);
 
-    List<Account> findByCustomerIdOrderByIdDesc(Long customerId);
+    Page<Account> findByCustomerIdOrderByIdDesc(Long customerId, Pageable pageable);
 
-    List<Account> findByAccountType(AccountTypes accountType);
+    Page<Account> findByAccountType(AccountTypes accountType, Pageable pageable);
 
     @Query(value = "SELECT a FROM Account a JOIN FETCH a.customer ORDER BY a.id DESC")
     Page<Account> findAllAccountsWithDetails(Pageable pageable);

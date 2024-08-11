@@ -3,6 +3,7 @@ package com.bank.controllers;
 import com.bank.dtos.PagedResponseDto;
 import com.bank.dtos.accounts.AccountDto;
 import com.bank.services.accounts.AccountService;
+import com.bank.utils.utils.ConvertorUtils;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -19,6 +20,22 @@ public class AccountController {
             @RequestParam(defaultValue = "0") Integer page,
             @RequestParam(defaultValue = "10") Integer size) {
         return _accountService.loadAccounts(page, size);
+    }
+
+    @GetMapping("/by/customer")
+    public PagedResponseDto<AccountDto> getCustomerAccounts(
+            @RequestParam String customerId,
+            @RequestParam(defaultValue = "0") Integer page,
+            @RequestParam(defaultValue = "10") Integer size) {
+        var customerIdLong = ConvertorUtils.tryParseLong(customerId, null);
+        return _accountService.loadCustomerAccounts(customerIdLong, page, size);
+    }
+
+    @GetMapping("/banks")
+    public PagedResponseDto<AccountDto> getAllBankAccounts(
+            @RequestParam(defaultValue = "0") Integer page,
+            @RequestParam(defaultValue = "10") Integer size) {
+        return _accountService.loadBankAccounts(page, size);
     }
 
     @GetMapping("/{id}")

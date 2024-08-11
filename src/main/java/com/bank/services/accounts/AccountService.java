@@ -2,6 +2,7 @@ package com.bank.services.accounts;
 
 import com.bank.dtos.PagedResponseDto;
 import com.bank.dtos.accounts.AccountDto;
+import com.bank.dtos.customers.CustomerDto;
 import com.bank.enums.accounts.AccountTypes;
 import com.bank.enums.accounts.Currencies;
 import com.bank.exceptions.DomainException;
@@ -10,6 +11,7 @@ import com.bank.models.customers.Customer;
 import com.bank.repos.accounts.AccountRepository;
 import com.bank.repos.customers.CustomerRepository;
 import org.modelmapper.ModelMapper;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
@@ -76,18 +78,16 @@ public class AccountService {
         return accountDto;
     }
 
-    public List<AccountDto> loadCustomerAccounts(Long customerId) {
+    public PagedResponseDto<AccountDto> loadCustomerAccounts(Long customerId, int page, int size) {
         var customer = _customerRepository.findById(customerId).orElse(null);
         if(customer == null)
             throw new DomainException("error.customer.notFound");
 
-        var accounts = _accountRepository.findByCustomerIdOrderByIdDesc(customerId);
-        var accountDtoList = new ArrayList<AccountDto>();
-        for(var account : accounts) {
-            accountDtoList.add(_modelMapper.map(account, AccountDto.class));
-        }
+        var pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "Id"));
+        var accounts = _accountRepository.findByCustomerIdOrderByIdDesc(customerId, pageable);
 
-        return accountDtoList;
+        var results = accounts.map(account -> _modelMapper.map(account, AccountDto.class));
+        return new PagedResponseDto<>(results);
     }
 
     public AccountDto loadBankAccount(Currencies currency) {
@@ -98,14 +98,11 @@ public class AccountService {
         return _modelMapper.map(account, AccountDto.class);
     }
 
-    public List<AccountDto> loadBankAccounts() {
-        var accounts = _accountRepository.findByAccountType(AccountTypes.BankAccount);
-        var accountDtoList = new ArrayList<AccountDto>();
-        for(var account : accounts) {
-            accountDtoList.add(_modelMapper.map(account, AccountDto.class));
-        }
-
-        return accountDtoList;
+    public PagedResponseDto<AccountDto> loadBankAccounts(int page, int size) {
+        var pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "Id"));
+        var accounts = _accountRepository.findByAccountType(AccountTypes.BankAccount, pageable);
+        var results = accounts.map(account -> _modelMapper.map(account, AccountDto.class));
+        return new PagedResponseDto<>(results);
     }
 
     public AccountDto addAccount(AccountDto accountDto) {
