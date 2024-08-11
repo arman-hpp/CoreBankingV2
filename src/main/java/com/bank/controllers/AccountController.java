@@ -3,7 +3,6 @@ package com.bank.controllers;
 import com.bank.dtos.PagedResponseDto;
 import com.bank.dtos.accounts.AccountDto;
 import com.bank.services.accounts.AccountService;
-import com.bank.utils.utils.ConvertorUtils;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -24,11 +23,10 @@ public class AccountController {
 
     @GetMapping("/by/customer")
     public PagedResponseDto<AccountDto> getCustomerAccounts(
-            @RequestParam String customerId,
+            @RequestParam Long customerId,
             @RequestParam(defaultValue = "0") Integer page,
             @RequestParam(defaultValue = "10") Integer size) {
-        var customerIdLong = ConvertorUtils.tryParseLong(customerId, null);
-        return _accountService.loadCustomerAccounts(customerIdLong, page, size);
+        return _accountService.loadCustomerAccounts(customerId, page, size);
     }
 
     @GetMapping("/banks")

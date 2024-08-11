@@ -2,7 +2,6 @@ package com.bank.services.accounts;
 
 import com.bank.dtos.PagedResponseDto;
 import com.bank.dtos.accounts.AccountDto;
-import com.bank.dtos.customers.CustomerDto;
 import com.bank.enums.accounts.AccountTypes;
 import com.bank.enums.accounts.Currencies;
 import com.bank.exceptions.DomainException;
@@ -11,14 +10,11 @@ import com.bank.models.customers.Customer;
 import com.bank.repos.accounts.AccountRepository;
 import com.bank.repos.customers.CustomerRepository;
 import org.modelmapper.ModelMapper;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.List;
 
 @Service
 public class AccountService {
