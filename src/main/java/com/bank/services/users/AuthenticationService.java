@@ -7,6 +7,7 @@ import com.bank.exceptions.DomainException;
 import com.bank.models.users.User;
 import com.bank.repos.users.UserRepository;
 import com.bank.dtos.users.UserDto;
+import jakarta.servlet.http.HttpServletResponse;
 import org.modelmapper.ModelMapper;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -36,7 +37,7 @@ public class AuthenticationService  {
         _authenticationManager = authenticationManager;
     }
 
-    public UserLoginOutputDto authenticate(UserLoginInputDto input) {
+    public UserLoginOutputDto authenticate( UserLoginInputDto input) {
         try {
             var authentication = _authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(input.getUsername(), input.getPassword())
@@ -55,6 +56,10 @@ public class AuthenticationService  {
 
             var accessToken = _jwtService.generateAccessToken(user);
             var refreshToken = _jwtService.generateRefreshToken(user);
+
+
+
+
 
             return new UserLoginOutputDto(input.getUsername(), accessToken, refreshToken);
         } catch (AuthenticationException ex) {

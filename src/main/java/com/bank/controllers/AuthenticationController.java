@@ -4,6 +4,8 @@ import com.bank.dtos.users.*;
 import com.bank.exceptions.DomainException;
 import com.bank.services.users.AuthenticationService;
 import com.bank.services.users.UserService;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -24,8 +26,11 @@ public class AuthenticationController {
     }
 
     @PostMapping("/login")
-    public UserLoginOutputDto login(@RequestBody UserLoginInputDto input) {
-        return _authenticationService.authenticate(input);
+    public UserLoginOutputDto login(HttpServletResponse response, @RequestBody UserLoginInputDto input) {
+        var result = _authenticationService.authenticate(input);
+        response.addCookie(new Cookie("ACCESS_TOKEN", result.accessToken));
+
+        return result;
     }
 
     @PostMapping("/register")
