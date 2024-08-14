@@ -16,8 +16,11 @@ import java.util.function.Function;
 
 @Service
 public class JwtService {
-    @Value("${security.jwt.secret-key}")
-    private String secretKey;
+    @Value("${security.jwt.access-token.secret-key}")
+    private String accessTokenSecretKey;
+
+    @Value("${security.jwt.refresh-token.secret-key}")
+    private String refreshTokenSecretKet;
 
     @Value("${security.jwt.access-token.expiration-time}")
     private long accessTokenExpiration;
@@ -28,26 +31,34 @@ public class JwtService {
     private static final Logger logger = LoggerFactory.getLogger(JwtService.class);
 
     public String generateAccessToken(UserDetails userDetails) {
-        return generateToken(userDetails, accessTokenExpiration);
+        return generateToken(userDetails, accessTokenExpiration, getAccessTokenSignInKey());
     }
 
     public String generateRefreshToken(UserDetails userDetails) {
-        return generateToken(userDetails, refreshTokenExpiration);
+        return generateToken(userDetails, refreshTokenExpiration, getRefreshTokenSignInKey());
     }
 
-    public String generateToken(UserDetails userDetails, Long expireTime){
+    public String generateToken(UserDetails userDetails, Long expireTime, SecretKey secretKey){
         return Jwts
                 .builder()
                 .subject(userDetails.getUsername())
                 .issuedAt(new Date(System.currentTimeMillis()))
                 .expiration(new Date(System.currentTimeMillis() + expireTime))
-                .signWith(getSignInKey())
+                .signWith(secretKey)
                 .compact();
     }
 
-    public boolean isTokenValid(String token) {
+    public boolean isAccessTokenTokenValid(String token) {
+        return isTokenValid(token, getAccessTokenSignInKey());
+    }
+
+    public boolean isRefreshTokenTokenValid(String token) {
+        return isTokenValid(token, getRefreshTokenSignInKey());
+    }
+
+    public boolean isTokenValid(String token, SecretKey secretKey){
         try {
-            return !isTokenExpired(token);
+            return !isTokenExpired(token, secretKey);
         } catch (SignatureException e) {
             logger.error("Invalid JWT signature: {}", e.getMessage());
         } catch (MalformedJwtException e) {
@@ -63,51 +74,44 @@ public class JwtService {
         return false;
     }
 
-    public String extractUsername(String token) {
-        return extractClaim(token, Claims::getSubject);
+    public String extractUsernameFromAccessToken(String token) {
+        return extractClaim(token, getAccessTokenSignInKey(), Claims::getSubject);
     }
 
-    public <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
-        final Claims claims = extractAllClaims(token);
+    public String extractUsernameFromRefreshToken(String token) {
+        return extractClaim(token, getRefreshTokenSignInKey(), Claims::getSubject);
+    }
+
+    public <T> T extractClaim(String token, SecretKey secretKey, Function<Claims, T> claimsResolver) {
+        final Claims claims = extractAllClaims(token, secretKey);
         return claimsResolver.apply(claims);
     }
 
-    private boolean isTokenExpired(String token) {
-        return extractExpiration(token).before(new Date());
+    private boolean isTokenExpired(String token, SecretKey secretKey) {
+        return extractExpiration(token, secretKey).before(new Date());
     }
 
-    private Date extractExpiration(String token) {
-        return extractClaim(token, Claims::getExpiration);
+    private Date extractExpiration(String token, SecretKey secretKey) {
+        return extractClaim(token, secretKey, Claims::getExpiration);
     }
 
-    private Claims extractAllClaims(String token) {
-        try {
-            return Jwts
-                    .parser()
-                    .verifyWith(getSignInKey())
-                    .build()
-                    .parseSignedClaims(token)
-                    .getPayload();
-        } catch (SignatureException e) {
-            logger.error("Invalid JWT signature: {}", e.getMessage());
-            throw e;
-        } catch (MalformedJwtException e) {
-            logger.error("Invalid JWT token: {}", e.getMessage());
-            throw e;
-        } catch (ExpiredJwtException e) {
-            logger.error("JWT token is expired: {}", e.getMessage());
-            throw e;
-        } catch (UnsupportedJwtException e) {
-            logger.error("JWT token is unsupported: {}", e.getMessage());
-            throw e;
-        } catch (IllegalArgumentException e) {
-            logger.error("JWT claims string is empty: {}", e.getMessage());
-            throw e;
-        }
+    private Claims extractAllClaims(String token, SecretKey secretKey) {
+        return Jwts
+                .parser()
+                .verifyWith(secretKey)
+                .build()
+                .parseSignedClaims(token)
+                .getPayload();
+
     }
 
-    private SecretKey getSignInKey() {
-        var keyBytes = Decoders.BASE64.decode(secretKey);
+    private SecretKey getAccessTokenSignInKey() {
+        var keyBytes = Decoders.BASE64.decode(accessTokenSecretKey);
+        return Keys.hmacShaKeyFor(keyBytes);
+    }
+
+    private SecretKey getRefreshTokenSignInKey() {
+        var keyBytes = Decoders.BASE64.decode(refreshTokenSecretKet);
         return Keys.hmacShaKeyFor(keyBytes);
     }
 }

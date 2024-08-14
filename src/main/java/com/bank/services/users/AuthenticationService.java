@@ -7,14 +7,15 @@ import com.bank.exceptions.DomainException;
 import com.bank.models.users.User;
 import com.bank.repos.users.UserRepository;
 import com.bank.dtos.users.UserDto;
-import jakarta.servlet.http.HttpServletResponse;
 import org.modelmapper.ModelMapper;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
@@ -37,7 +38,7 @@ public class AuthenticationService  {
         _authenticationManager = authenticationManager;
     }
 
-    public UserLoginOutputDto authenticate( UserLoginInputDto input) {
+    public UserLoginOutputDto authenticate(UserLoginInputDto input) {
         try {
             var authentication = _authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(input.getUsername(), input.getPassword())
@@ -57,15 +58,28 @@ public class AuthenticationService  {
             var accessToken = _jwtService.generateAccessToken(user);
             var refreshToken = _jwtService.generateRefreshToken(user);
 
-
-
-
-
             return new UserLoginOutputDto(input.getUsername(), accessToken, refreshToken);
         } catch (AuthenticationException ex) {
             logFailedLogin(input.getUsername());
             throw new DomainException("error.auth.credentials.invalid");
         }
+    }
+
+    public UserLoginOutputDto reAuthenticate(String refreshToken){
+        if (!_jwtService.isRefreshTokenTokenValid(refreshToken)) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
+        }
+
+        var username = _jwtService.extractUsernameFromRefreshToken(refreshToken);
+        var user = _userRepository.findByUsername(username).orElse(null);
+        if(user == null){
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
+        }
+
+        var newAccessToken = _jwtService.generateAccessToken(user);
+        var newRefreshToken = _jwtService.generateRefreshToken(user);
+
+        return new UserLoginOutputDto(username, newAccessToken, newRefreshToken);
     }
 
     private void logFailedLogin(String username) {
