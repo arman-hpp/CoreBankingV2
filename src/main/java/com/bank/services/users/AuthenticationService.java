@@ -1,12 +1,12 @@
 package com.bank.services.users;
 
+import com.bank.dtos.users.RefreshTokenInputDto;
+import com.bank.dtos.users.UserDto;
 import com.bank.dtos.users.UserLoginInputDto;
 import com.bank.dtos.users.UserLoginOutputDto;
 import com.bank.enums.users.UserTypes;
-import com.bank.exceptions.DomainException;
 import com.bank.models.users.User;
 import com.bank.repos.users.UserRepository;
-import com.bank.dtos.users.UserDto;
 import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
@@ -46,11 +46,11 @@ public class AuthenticationService  {
 
             var principal = authentication.getPrincipal();
             if (principal == null) {
-                throw new DomainException("error.auth.credentials.invalid");
+                throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
             }
 
             if (!(principal instanceof User user)) {
-                throw new DomainException("error.auth.credentials.invalid");
+                throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
             }
 
             logSuccessfulLogin(user.getUsername());
@@ -61,16 +61,20 @@ public class AuthenticationService  {
             return new UserLoginOutputDto(input.getUsername(), accessToken, refreshToken);
         } catch (AuthenticationException ex) {
             logFailedLogin(input.getUsername());
-            throw new DomainException("error.auth.credentials.invalid");
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
         }
     }
 
-    public UserLoginOutputDto reAuthenticate(String refreshToken){
-        if (!_jwtService.isRefreshTokenTokenValid(refreshToken)) {
+    public UserLoginOutputDto reAuthenticate(RefreshTokenInputDto input){
+        if (!_jwtService.isRefreshTokenTokenValid(input.getRefreshToken())) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
         }
 
-        var username = _jwtService.extractUsernameFromRefreshToken(refreshToken);
+        var username = _jwtService.extractUsernameFromRefreshToken(input.getRefreshToken());
+        if(username == null){
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
+        }
+
         var user = _userRepository.findByUsername(username).orElse(null);
         if(user == null){
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);

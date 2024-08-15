@@ -46,6 +46,6 @@ public class AuthenticationController {
 
     @PostMapping("/refresh_token")
     public UserLoginOutputDto refreshToken(@RequestBody RefreshTokenInputDto input) {
-        return _authenticationService.reAuthenticate(input.getRefreshToken());
+        return _authenticationService.reAuthenticate(input);
     }
 }
