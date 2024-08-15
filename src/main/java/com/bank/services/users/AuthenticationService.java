@@ -1,10 +1,9 @@
 package com.bank.services.users;
 
-import com.bank.dtos.users.RefreshTokenInputDto;
-import com.bank.dtos.users.UserDto;
-import com.bank.dtos.users.UserLoginInputDto;
-import com.bank.dtos.users.UserLoginOutputDto;
+import com.bank.dtos.users.*;
+import com.bank.enums.users.UserState;
 import com.bank.enums.users.UserTypes;
+import com.bank.exceptions.DomainException;
 import com.bank.models.users.User;
 import com.bank.repos.users.UserRepository;
 import org.modelmapper.ModelMapper;
@@ -14,10 +13,12 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
+import java.util.Objects;
 import java.util.Optional;
 
 @SuppressWarnings("unused")
@@ -25,17 +26,20 @@ import java.util.Optional;
 public class AuthenticationService  {
     private final UserRepository _userRepository;
     private final ModelMapper _modelMapper;
-    private final JwtService _jwtService;
+    private final TokenService _tokenService;
     private final AuthenticationManager _authenticationManager;
+    private final PasswordEncoder _passwordEncoder;
 
     public AuthenticationService(UserRepository userRepository,
                                  ModelMapper modelMapper,
-                                 JwtService jwtService,
-                                 AuthenticationManager authenticationManager) {
+                                 TokenService tokenService,
+                                 AuthenticationManager authenticationManager,
+                                 PasswordEncoder passwordEncoder) {
         _userRepository = userRepository;
         _modelMapper = modelMapper;
-        _jwtService = jwtService;
+        _tokenService = tokenService;
         _authenticationManager = authenticationManager;
+        _passwordEncoder = passwordEncoder;
     }
 
     public UserLoginOutputDto authenticate(UserLoginInputDto input) {
@@ -55,35 +59,39 @@ public class AuthenticationService  {
 
             logSuccessfulLogin(user.getUsername());
 
-            var accessToken = _jwtService.generateAccessToken(user);
-            var refreshToken = _jwtService.generateRefreshToken(user);
+            var accessToken = _tokenService.generateAccessToken(user);
+            var refreshToken = _tokenService.generateRefreshToken(user);
+            var refreshTokenExpiration = _tokenService.getRefreshTokenExpiration();
 
-            return new UserLoginOutputDto(input.getUsername(), accessToken, refreshToken);
+            return new UserLoginOutputDto(input.getUsername(), accessToken, refreshToken, refreshTokenExpiration);
         } catch (AuthenticationException ex) {
             logFailedLogin(input.getUsername());
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
         }
     }
 
-    public UserLoginOutputDto reAuthenticate(RefreshTokenInputDto input){
-        if (!_jwtService.isRefreshTokenTokenValid(input.getRefreshToken())) {
+    public AccessTokenDto reAuthenticate(RefreshTokenInputDto input) {
+        if(input.getRefreshToken() == null) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
         }
 
-        var username = _jwtService.extractUsernameFromRefreshToken(input.getRefreshToken());
-        if(username == null){
+        if (!_tokenService.isRefreshTokenTokenValid(input.getRefreshToken())) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
+        }
+
+        var username = _tokenService.extractUsernameFromRefreshToken(input.getRefreshToken());
+        if (username == null) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
         }
 
         var user = _userRepository.findByUsername(username).orElse(null);
-        if(user == null){
+        if (user == null) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
         }
 
-        var newAccessToken = _jwtService.generateAccessToken(user);
-        var newRefreshToken = _jwtService.generateRefreshToken(user);
+        var newAccessToken = _tokenService.generateAccessToken(user);
 
-        return new UserLoginOutputDto(username, newAccessToken, newRefreshToken);
+        return new AccessTokenDto(username, newAccessToken);
     }
 
     private void logFailedLogin(String username) {
@@ -189,5 +197,53 @@ public class AuthenticationService  {
             return Optional.empty();
         }
         return Optional.ofNullable(user.getId());
+    }
+
+    public void login(UserLoginInputDto userLoginInputDto) {
+        var user = _userRepository.findByUsername(userLoginInputDto.getUsername()).orElse(null);
+        if(user == null)
+            throw new DomainException("error.auth.notFound");
+
+        if (!Objects.equals(user.getPassword(), userLoginInputDto.getPassword()))
+            throw new DomainException("error.auth.credentials.invalid");
+    }
+
+    public UserDto register(UserRegisterInputDto userRegisterInputDto) {
+        if(_userRepository.findByUsername(userRegisterInputDto.getUsername()).orElse(null) != null)
+            throw new DomainException("error.auth.username.duplicate");
+
+        if(!userRegisterInputDto.getPassword().equals(userRegisterInputDto.getRepeatPassword()))
+            throw new DomainException("error.auth.password.mismatch");
+
+        var user = _modelMapper.map(userRegisterInputDto, User.class);
+        user.setUserType(UserTypes.ROLE_USER);
+        user.setPassword(_passwordEncoder.encode(userRegisterInputDto.getPassword()));
+        user.setUserState(UserState.Enabled);
+        user.setFailedAttempt(0);
+        user.setLastPasswordChangedDate(LocalDateTime.now());
+
+        _userRepository.save(user);
+
+        return _modelMapper.map(user, UserDto.class);
+    }
+
+    public void changePassword(UserChangePasswordInputDto userChangePasswordInputDto) {
+        if(!Objects.equals(userChangePasswordInputDto.getNewPassword(), userChangePasswordInputDto.getRepeatNewPassword()))
+            throw new DomainException("error.auth.password.mismatch");
+
+        if(Objects.equals(userChangePasswordInputDto.getOldPassword(), userChangePasswordInputDto.getNewPassword()))
+            throw new DomainException("error.auth.password.samePassword");
+
+        var user = _userRepository.findById(userChangePasswordInputDto.getId()).orElse(null);
+        if(user == null)
+            throw new DomainException("error.auth.notFound");
+
+        if (!_passwordEncoder.matches(userChangePasswordInputDto.getOldPassword(), user.getPassword()))
+            throw new DomainException("error.auth.credentials.invalid");
+
+        user.setPassword(_passwordEncoder.encode(userChangePasswordInputDto.getNewPassword()));
+        user.setLastPasswordChangedDate(LocalDateTime.now());
+
+        _userRepository.save(user);
     }
 }

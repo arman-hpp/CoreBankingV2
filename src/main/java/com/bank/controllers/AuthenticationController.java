@@ -3,19 +3,19 @@ package com.bank.controllers;
 import com.bank.dtos.users.*;
 import com.bank.exceptions.DomainException;
 import com.bank.services.users.AuthenticationService;
-import com.bank.services.users.UserService;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.http.ResponseCookie;
+import org.springframework.lang.NonNull;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/auth")
 public class AuthenticationController {
     private final AuthenticationService _authenticationService;
-    private final UserService _userService;
 
-    public AuthenticationController(AuthenticationService authenticationService,
-                                    UserService userService) {
+    public AuthenticationController(AuthenticationService authenticationService) {
         _authenticationService = authenticationService;
-        _userService = userService;
     }
 
     @GetMapping({"/","/me"})
@@ -24,13 +24,23 @@ public class AuthenticationController {
     }
 
     @PostMapping("/login")
-    public UserLoginOutputDto login(@RequestBody UserLoginInputDto input) {
-       return  _authenticationService.authenticate(input);
+    public AccessTokenDto login(HttpServletResponse response, @RequestBody UserLoginInputDto input) {
+       var userLoginDto =  _authenticationService.authenticate(input);
+        var cookie = ResponseCookie.from("RefreshToken", userLoginDto.refreshToken)
+                .httpOnly(true)
+                .secure(true)
+                .path("/")
+                .maxAge(userLoginDto.getRefreshTokenExpiration() / 1000)
+                .sameSite("Strict")
+                .build();
+
+        response.addHeader("Set-Cookie", cookie.toString());
+        return new AccessTokenDto(userLoginDto.getUsername(), userLoginDto.accessToken);
     }
 
     @PostMapping("/register")
     public UserDto register(@RequestBody UserRegisterInputDto input) {
-        return _userService.register(input);
+        return _authenticationService.register(input);
     }
 
     @PostMapping("/change_password")
@@ -41,11 +51,26 @@ public class AuthenticationController {
         }
 
         input.setId(userId);
-        _userService.changePassword(input);
+        _authenticationService.changePassword(input);
     }
 
-    @PostMapping("/refresh_token")
-    public UserLoginOutputDto refreshToken(@RequestBody RefreshTokenInputDto input) {
+    @PostMapping("/refresh_token2")
+    public AccessTokenDto refreshToken(HttpServletRequest request) {
+        var refreshToken = getRefreshTokenFromCookie(request);
+        var input = new RefreshTokenInputDto(refreshToken);
         return _authenticationService.reAuthenticate(input);
+    }
+
+    @SuppressWarnings("unused")
+    private String getRefreshTokenFromCookie(@NonNull HttpServletRequest request){
+        var cookies = request.getCookies();
+        if (cookies != null) {
+            for (var cookie : cookies) {
+                if (cookie.getName().equals("RefreshToken")) {
+                    return cookie.getValue();
+                }
+            }
+        }
+        return null;
     }
 }

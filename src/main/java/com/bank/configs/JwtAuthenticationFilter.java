@@ -1,6 +1,6 @@
 package com.bank.configs;
 
-import com.bank.services.users.JwtService;
+import com.bank.services.users.TokenService;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.filter.OncePerRequestFilter;
 import jakarta.servlet.FilterChain;
@@ -17,13 +17,13 @@ import java.io.IOException;
 
 @Configuration
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
-    private final JwtService _jwtService;
+    private final TokenService _tokenService;
     private final UserDetailsService _userDetailsService;
 
     public JwtAuthenticationFilter(
-            JwtService jwtService,
+            TokenService tokenService,
             UserDetailsService userDetailsService) {
-        _jwtService = jwtService;
+        _tokenService = tokenService;
         _userDetailsService = userDetailsService;
     }
 
@@ -34,19 +34,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             @NonNull FilterChain filterChain
     ) throws ServletException, IOException {
 
-        var authHeader = request.getHeader("Authorization");
-        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+        var accessToken = getAccessTokenFromHeader(request);
+        if(accessToken == null) {
             filterChain.doFilter(request, response);
             return;
         }
 
-        var accessToken = authHeader.substring(7);
-        if (!_jwtService.isAccessTokenTokenValid(accessToken)) {
-            filterChain.doFilter(request, response);
-            return;
-        }
-
-        var username = _jwtService.extractUsernameFromAccessToken(accessToken);
+        var username = _tokenService.extractUsernameFromAccessToken(accessToken);
         var authentication = SecurityContextHolder.getContext().getAuthentication();
         if (username == null || authentication != null) {
             filterChain.doFilter(request, response);
@@ -63,5 +57,19 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         SecurityContextHolder.getContext().setAuthentication(authToken);
 
         filterChain.doFilter(request, response);
+    }
+
+    private String getAccessTokenFromHeader(@NonNull HttpServletRequest request){
+        var authHeader = request.getHeader("Authorization");
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            return null;
+        }
+
+        var accessToken = authHeader.substring(7);
+        if (!_tokenService.isAccessTokenTokenValid(accessToken)) {
+            return null;
+        }
+
+        return accessToken;
     }
 }

@@ -1,12 +1,9 @@
 package com.bank.services.users;
 
 import io.jsonwebtoken.*;
-import io.jsonwebtoken.io.Decoders;
-import io.jsonwebtoken.security.Keys;
 import io.jsonwebtoken.security.SignatureException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
@@ -16,29 +13,10 @@ import java.util.function.Function;
 
 @Service
 public class JwtService {
-    @Value("${security.jwt.access-token.secret-key}")
-    private String accessTokenSecretKey;
-
-    @Value("${security.jwt.refresh-token.secret-key}")
-    private String refreshTokenSecretKet;
-
-    @Value("${security.jwt.access-token.expiration-time}")
-    private long accessTokenExpiration;
-
-    @Value("${security.jwt.refresh-token.expiration-time}")
-    private long refreshTokenExpiration;
 
     private static final Logger logger = LoggerFactory.getLogger(JwtService.class);
 
-    public String generateAccessToken(UserDetails userDetails) {
-        return generateToken(userDetails, accessTokenExpiration, getAccessTokenSignInKey());
-    }
-
-    public String generateRefreshToken(UserDetails userDetails) {
-        return generateToken(userDetails, refreshTokenExpiration, getRefreshTokenSignInKey());
-    }
-
-    public String generateToken(UserDetails userDetails, Long expireTime, SecretKey secretKey){
+    public String generateToken(UserDetails userDetails, Integer expireTime, SecretKey secretKey){
         return Jwts
                 .builder()
                 .subject(userDetails.getUsername())
@@ -46,14 +24,6 @@ public class JwtService {
                 .expiration(new Date(System.currentTimeMillis() + expireTime))
                 .signWith(secretKey)
                 .compact();
-    }
-
-    public boolean isAccessTokenTokenValid(String token) {
-        return isTokenValid(token, getAccessTokenSignInKey());
-    }
-
-    public boolean isRefreshTokenTokenValid(String token) {
-        return isTokenValid(token, getRefreshTokenSignInKey());
     }
 
     public boolean isTokenValid(String token, SecretKey secretKey){
@@ -72,14 +42,6 @@ public class JwtService {
         }
 
         return false;
-    }
-
-    public String extractUsernameFromAccessToken(String token) {
-        return extractClaim(token, getAccessTokenSignInKey(), Claims::getSubject);
-    }
-
-    public String extractUsernameFromRefreshToken(String token) {
-        return extractClaim(token, getRefreshTokenSignInKey(), Claims::getSubject);
     }
 
     public <T> T extractClaim(String token, SecretKey secretKey, Function<Claims, T> claimsResolver) {
@@ -102,16 +64,5 @@ public class JwtService {
                 .build()
                 .parseSignedClaims(token)
                 .getPayload();
-
-    }
-
-    private SecretKey getAccessTokenSignInKey() {
-        var keyBytes = Decoders.BASE64.decode(accessTokenSecretKey);
-        return Keys.hmacShaKeyFor(keyBytes);
-    }
-
-    private SecretKey getRefreshTokenSignInKey() {
-        var keyBytes = Decoders.BASE64.decode(refreshTokenSecretKet);
-        return Keys.hmacShaKeyFor(keyBytes);
     }
 }
