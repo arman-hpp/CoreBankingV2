@@ -40,6 +40,11 @@ public class ExceptionController implements ErrorController {
             body.put("message", "You don't have permission to access this resource.");
             body.put("timestamp", LocalDateTime.now());
             return new ResponseEntity<>(body, HttpStatus.FORBIDDEN);
+        }else if (statusCode == HttpStatus.UNAUTHORIZED.value()) {
+                body.put("error", "Unauthorized");
+                body.put("message", "You are not authorized to access this service.");
+                body.put("timestamp", LocalDateTime.now());
+                return new ResponseEntity<>(body, HttpStatus.UNAUTHORIZED);
         } else if (statusCode == HttpStatus.INTERNAL_SERVER_ERROR.value()) {
             var throwable = (Throwable) request.getAttribute(RequestDispatcher.ERROR_EXCEPTION);
             if (throwable != null && throwable.getCause() instanceof DomainException) {

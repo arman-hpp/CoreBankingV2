@@ -1,5 +1,6 @@
 package com.bank.services.users;
 
+import com.bank.utils.utils.JwtUtils;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
@@ -25,35 +26,28 @@ public class TokenService {
     @Value("${security.jwt.refresh-token.expiration-time}")
     private Integer refreshTokenExpiration;
 
-    private final JwtService _jwtService;
-
-    public TokenService(JwtService jwtService){
-
-        _jwtService = jwtService;
-    }
-
     public String generateAccessToken(UserDetails userDetails) {
-        return _jwtService.generateToken(userDetails, accessTokenExpiration, getAccessTokenSignInKey());
+        return JwtUtils.generateToken(userDetails, accessTokenExpiration, getAccessTokenSignInKey());
     }
 
     public String generateRefreshToken(UserDetails userDetails) {
-        return _jwtService.generateToken(userDetails, refreshTokenExpiration, getRefreshTokenSignInKey());
+        return JwtUtils.generateToken(userDetails, refreshTokenExpiration, getRefreshTokenSignInKey());
     }
 
     public boolean isAccessTokenTokenValid(String token) {
-        return _jwtService.isTokenValid(token, getAccessTokenSignInKey());
+        return JwtUtils.isTokenValid(token, getAccessTokenSignInKey());
     }
 
     public boolean isRefreshTokenTokenValid(String token) {
-        return _jwtService.isTokenValid(token, getRefreshTokenSignInKey());
+        return JwtUtils.isTokenValid(token, getRefreshTokenSignInKey());
     }
 
     public String extractUsernameFromAccessToken(String token) {
-        return _jwtService.extractClaim(token, getAccessTokenSignInKey(), Claims::getSubject);
+        return JwtUtils.extractClaim(token, getAccessTokenSignInKey(), Claims::getSubject);
     }
 
     public String extractUsernameFromRefreshToken(String token) {
-        return _jwtService.extractClaim(token, getRefreshTokenSignInKey(), Claims::getSubject);
+        return JwtUtils.extractClaim(token, getRefreshTokenSignInKey(), Claims::getSubject);
     }
 
     private SecretKey getAccessTokenSignInKey() {

@@ -1,5 +1,6 @@
 package com.bank.configs;
 
+import com.bank.models.users.User;
 import com.bank.services.users.TokenService;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -48,6 +49,16 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
 
         var userDetails = _userDetailsService.loadUserByUsername(username);
+        if(!(userDetails instanceof User user)) {
+            filterChain.doFilter(request, response);
+            return;
+        }
+
+        if(user.getAccessToken() == null || !user.getAccessToken().equals(accessToken)) {
+            filterChain.doFilter(request, response);
+            return;
+        }
+
         var authToken = new UsernamePasswordAuthenticationToken(
                 userDetails,
                 null,

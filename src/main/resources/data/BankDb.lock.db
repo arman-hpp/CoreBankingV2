@@ -1,0 +1,6 @@
+#FileLock
+#Fri Aug 16 19:40:00 IRST 2024
+hostName=192.168.1.102
+id=1915bf3f4913b945b179c3693f1de9ccfda53639029
+method=file
+server=192.168.1.102\:54333

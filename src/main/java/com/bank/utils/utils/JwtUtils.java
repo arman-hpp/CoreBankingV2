@@ -1,22 +1,19 @@
-package com.bank.services.users;
+package com.bank.utils.utils;
 
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.SignatureException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.stereotype.Service;
 
 import javax.crypto.SecretKey;
 import java.util.Date;
 import java.util.function.Function;
 
-@Service
-public class JwtService {
+public class JwtUtils {
+    private static final Logger logger = LoggerFactory.getLogger(JwtUtils.class);
 
-    private static final Logger logger = LoggerFactory.getLogger(JwtService.class);
-
-    public String generateToken(UserDetails userDetails, Integer expireTime, SecretKey secretKey){
+    public static String generateToken(UserDetails userDetails, Integer expireTime, SecretKey secretKey){
         return Jwts
                 .builder()
                 .subject(userDetails.getUsername())
@@ -26,7 +23,7 @@ public class JwtService {
                 .compact();
     }
 
-    public boolean isTokenValid(String token, SecretKey secretKey){
+    public static boolean isTokenValid(String token, SecretKey secretKey){
         try {
             return !isTokenExpired(token, secretKey);
         } catch (SignatureException e) {
@@ -44,20 +41,20 @@ public class JwtService {
         return false;
     }
 
-    public <T> T extractClaim(String token, SecretKey secretKey, Function<Claims, T> claimsResolver) {
+    public static <T> T extractClaim(String token, SecretKey secretKey, Function<Claims, T> claimsResolver) {
         final Claims claims = extractAllClaims(token, secretKey);
         return claimsResolver.apply(claims);
     }
 
-    private boolean isTokenExpired(String token, SecretKey secretKey) {
+    private static boolean isTokenExpired(String token, SecretKey secretKey) {
         return extractExpiration(token, secretKey).before(new Date());
     }
 
-    private Date extractExpiration(String token, SecretKey secretKey) {
+    private static Date extractExpiration(String token, SecretKey secretKey) {
         return extractClaim(token, secretKey, Claims::getExpiration);
     }
 
-    private Claims extractAllClaims(String token, SecretKey secretKey) {
+    private static Claims extractAllClaims(String token, SecretKey secretKey) {
         return Jwts
                 .parser()
                 .verifyWith(secretKey)

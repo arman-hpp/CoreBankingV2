@@ -57,11 +57,11 @@ public class AuthenticationService  {
                 throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
             }
 
-            logSuccessfulLogin(user.getUsername());
-
             var accessToken = _tokenService.generateAccessToken(user);
             var refreshToken = _tokenService.generateRefreshToken(user);
             var refreshTokenExpiration = _tokenService.getRefreshTokenExpiration();
+
+            logSuccessfulLogin(user.getUsername(), accessToken, refreshToken);
 
             return new UserLoginOutputDto(input.getUsername(), accessToken, refreshToken, refreshTokenExpiration);
         } catch (AuthenticationException ex) {
@@ -89,9 +89,27 @@ public class AuthenticationService  {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
         }
 
+        if(user.getRefreshToken() == null || !user.getRefreshToken().equals(input.getRefreshToken())) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
+        }
+
         var newAccessToken = _tokenService.generateAccessToken(user);
 
+        logSuccessfulReLogin(username, newAccessToken);
+
         return new AccessTokenDto(username, newAccessToken);
+    }
+
+    public void revokeAuthenticate(Long userId){
+        var user = _userRepository.findById(userId).orElse(null);
+        if (user == null) {
+            return;
+        }
+
+        user.setAccessToken(null);
+        user.setRefreshToken(null);
+
+        _userRepository.save(user);
     }
 
     private void logFailedLogin(String username) {
@@ -119,20 +137,29 @@ public class AuthenticationService  {
         }
     }
 
-    private void logSuccessfulLogin(String username) {
-        try {
-            var user = _userRepository.findByUsername(username).orElse(null);
-            if (user == null) {
-                return;
-            }
-
-            user.setFailedAttempt(0);
-            user.setLastLoginDate(LocalDateTime.now());
-
-            _userRepository.save(user);
-        } catch (Exception ex) {
-            // ignore
+    private void logSuccessfulLogin(String username, String accessToken, String refreshToken) {
+        var user = _userRepository.findByUsername(username).orElse(null);
+        if (user == null) {
+            return;
         }
+
+        user.setFailedAttempt(0);
+        user.setLastLoginDate(LocalDateTime.now());
+        user.setAccessToken(accessToken);
+        user.setRefreshToken(refreshToken);
+
+        _userRepository.save(user);
+    }
+
+    private void logSuccessfulReLogin(String username, String accessToken) {
+        var user = _userRepository.findByUsername(username).orElse(null);
+        if (user == null) {
+            return;
+        }
+
+        user.setAccessToken(accessToken);
+
+        _userRepository.save(user);
     }
 
     public Boolean isUserAuthenticated() {

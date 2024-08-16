@@ -50,6 +50,12 @@ public class User extends BaseEntity implements UserDetails {
     @Column(name = "lock_time")
     private LocalDateTime lockTime;
 
+    @Column(name = "access_token", unique = true)
+    private String accessToken;
+
+    @Column(name = "refresh_token", unique = true)
+    private String refreshToken;
+
     @Override
     public String toString() {
         return getUsername();
