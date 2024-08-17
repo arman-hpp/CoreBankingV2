@@ -1,6 +1,0 @@
-#FileLock
-#Sat Aug 17 20:23:03 IRST 2024
-hostName=192.168.1.102
-id=1916141bb0b643157b355b27227dc18b348316715f5
-method=file
-server=192.168.1.102\:56093
