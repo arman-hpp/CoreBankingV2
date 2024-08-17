@@ -86,13 +86,13 @@ public class LoanController {
     }
 
     @PostMapping({"/deposit"})
-    public void depositLoan(@RequestBody LoanDto loanDto) {
+    public void depositLoan(@RequestBody DepositLoanInputDto depositLoanInputDto) {
         var currentUserId = _authenticationService.loadCurrentUserId().orElse(null);
         if (currentUserId == null) {
             throw new DomainException("error.auth.credentials.invalid");
         }
 
-        _depositLoanService.depositLoan(currentUserId, loanDto.getId());
+        _depositLoanService.depositLoan(currentUserId, depositLoanInputDto);
     }
 
     @PostMapping({"/installments/pay"})

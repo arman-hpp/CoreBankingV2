@@ -1,5 +1,6 @@
 package com.bank.services.loans;
 
+import com.bank.dtos.loans.DepositLoanInputDto;
 import com.bank.dtos.loans.LoanDto;
 import com.bank.dtos.transactions.TransferDto;
 import com.bank.exceptions.DomainException;
@@ -48,8 +49,8 @@ public class DepositLoanService {
     }
 
     @Transactional
-    public void depositLoan(Long userId, Long loanId) {
-        var loan = _loanRepository.findById(loanId).orElse(null);
+    public void depositLoan(Long userId, DepositLoanInputDto depositLoanInputDto) {
+        var loan = _loanRepository.findById(depositLoanInputDto.getLoanId()).orElse(null);
         if (loan == null)
             throw new DomainException("error.loan.noFound");
 
@@ -88,7 +89,7 @@ public class DepositLoanService {
 
         var transferDto = new TransferDto(loan.getAmount(),
                 "Debit for loan to customer account " + customerAccountId,
-                "Deposit loan Id " + loanId,
+                "Deposit loan Id " + depositLoanInputDto.getLoanId(),
                 bankAccountId, customerAccountId, userId, loan.getCurrency());
 
         _transactionService.transfer(transferDto);
