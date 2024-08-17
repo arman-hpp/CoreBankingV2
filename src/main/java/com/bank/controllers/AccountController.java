@@ -41,6 +41,11 @@ public class AccountController {
         return _accountService.loadAccount(id);
     }
 
+    @GetMapping("/customerAccount/{id}")
+    public AccountDto getCustomerAccountById(@PathVariable Long id) {
+        return _accountService.loadCustomerAccount(id);
+    }
+
     @PostMapping("/")
     public AccountDto addAccount(@RequestBody AccountDto accountDto) {
         return _accountService.addAccount(accountDto);

@@ -23,6 +23,9 @@ public class LoanConditionsService {
     }
 
     public LoanConditionsDto loadLoanCondition(Currencies currency) {
+        if(currency == null)
+            throw new DomainException("error.loan.conditions.currency.invalid");
+
         var loanConditions = _loanConditionsRepository
                 .findTop1ByCurrencyAndExpireDateIsNullOrderByStartDateDesc(currency).orElse(null);
         if(loanConditions == null)

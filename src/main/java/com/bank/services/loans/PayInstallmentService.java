@@ -1,5 +1,7 @@
 package com.bank.services.loans;
 
+import com.bank.dtos.loans.PayInstallmentInputDto;
+import com.bank.dtos.loans.SumNonPaidInstallmentOutputDto;
 import com.bank.dtos.transactions.TransferDto;
 import com.bank.exceptions.DomainException;
 import com.bank.models.loans.Installment;
@@ -26,7 +28,7 @@ public class PayInstallmentService {
         _accountService = accountService;
     }
 
-    public BigDecimal sumNonPaidInstallment(Long loanId, Integer payInstallmentCount) {
+    public SumNonPaidInstallmentOutputDto sumNonPaidInstallment(Long loanId, Integer payInstallmentCount) {
         if (payInstallmentCount <= 0)
             throw new DomainException("error.loan.installments.count.invalid");
 
@@ -36,20 +38,25 @@ public class PayInstallmentService {
         if(payInstallmentCount > installments.size())
             throw new DomainException("error.loan.installments.count.excess");
 
-        return installments.stream()
+        var sumNonPaidInstallments = installments.stream()
                 .map(Installment::getPaymentAmount)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        return new SumNonPaidInstallmentOutputDto(sumNonPaidInstallments);
     }
 
     @Transactional
-    public void payInstallments(Long loanId, Long accountId, Long userId, Integer payInstallmentCount) {
-        if(payInstallmentCount <= 0)
+    public void payInstallments(Long userId, PayInstallmentInputDto payInstallmentInputDto) {
+        if(payInstallmentInputDto.getInstallmentCount() <= 0)
             throw new DomainException("error.loan.installments.count.invalid");
 
         var installments = _installmentRepository
-                .findTopCountByLoanIdAndPaidOrderByInstallmentNo(payInstallmentCount, loanId, false);
+                .findTopCountByLoanIdAndPaidOrderByInstallmentNo(
+                        payInstallmentInputDto.getInstallmentCount(),
+                        payInstallmentInputDto.getLoanId(),
+                        false);
 
-        if(payInstallmentCount > installments.size())
+        if(payInstallmentInputDto.getInstallmentCount() > installments.size())
             throw new DomainException("error.loan.installments.count.excess");
 
         var sumInstallmentsAmount = installments.stream()
@@ -67,9 +74,10 @@ public class PayInstallmentService {
         var bankAccountId = _accountService.loadBankAccount(currency).getId();
 
         var transferDto = new TransferDto(sumInstallmentsAmount,
-                "Pay " + payInstallmentCount + " installment(s) for loan Id " + loanId,
-                "Deposit for loan's installment(s) from account Id " + accountId + " and loan Id " + loanId,
-                accountId, bankAccountId, userId, currency);
+                "Pay " + payInstallmentInputDto.getInstallmentCount() +
+                        " installment(s) for loan Id " + payInstallmentInputDto.getLoanId(),
+                "Deposit for loan's installment(s) from account Id " + payInstallmentInputDto.getAccountId() + " and loan Id " + payInstallmentInputDto.getLoanId(),
+                payInstallmentInputDto.getAccountId(), bankAccountId, userId, currency);
 
         _transactionService.transfer(transferDto);
     }

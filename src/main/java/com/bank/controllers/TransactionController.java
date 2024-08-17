@@ -8,6 +8,7 @@ import com.bank.services.transactions.TransactionService;
 import com.bank.services.users.AuthenticationService;
 import com.bank.exporters.IExporterFactory;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.lang.NonNull;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
@@ -56,8 +57,8 @@ public class TransactionController {
         return  _transactionService.loadLastBranchTransactions();
     }
 
-    @GetMapping("/export")
-    public void export(HttpServletResponse response,
+    @PostMapping("/export")
+    public void export(@NonNull HttpServletResponse response,
                        @RequestBody TransactionReportInputDto transactionReportInputDto) {
         response.setContentType("application/octet-stream");
 

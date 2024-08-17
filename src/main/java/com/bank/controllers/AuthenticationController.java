@@ -19,7 +19,7 @@ public class AuthenticationController {
         _authenticationService = authenticationService;
     }
 
-    @GetMapping({"/","/me"})
+    @GetMapping({"/", "/me"})
     public UserDto getCurrentUser() {
         return _authenticationService.loadCurrentUser();
     }
@@ -39,7 +39,7 @@ public class AuthenticationController {
     @PostMapping("/change_password")
     public void changeUserPassword(@RequestBody UserChangePasswordInputDto input) {
         var userId = _authenticationService.loadCurrentUserId().orElse(null);
-        if(userId == null) {
+        if (userId == null) {
             throw new DomainException("error.auth.credentials.invalid");
         }
 
@@ -58,23 +58,15 @@ public class AuthenticationController {
     @PostMapping("/logout")
     public void logout(@NonNull HttpServletResponse response) {
         var userId = _authenticationService.loadCurrentUserId().orElse(null);
-        if(userId == null) {
+        if (userId == null) {
             return;
         }
 
         _authenticationService.revokeAuthenticate(userId);
-
-        var cookie = ResponseCookie.from("RefreshToken", "")
-                .maxAge(0)
-                .httpOnly(true)
-                .secure(true)
-                .path("/")
-                .build();
-
-        response.setHeader(HttpHeaders.SET_COOKIE, cookie.toString());
+        deleteRefreshTokenFromCookie(response);
     }
 
-    private String getRefreshTokenFromCookie(@NonNull HttpServletRequest request){
+    private String getRefreshTokenFromCookie(@NonNull HttpServletRequest request) {
         var cookies = request.getCookies();
         if (cookies != null) {
             for (var cookie : cookies) {
@@ -86,7 +78,7 @@ public class AuthenticationController {
         return null;
     }
 
-    private void addRefreshTokenToCookie(@NonNull HttpServletResponse response, String refreshToken, Integer expireTime){
+    private void addRefreshTokenToCookie(@NonNull HttpServletResponse response, String refreshToken, Integer expireTime) {
         var cookie = ResponseCookie.from("RefreshToken", refreshToken)
                 .httpOnly(true)
                 .secure(true)
@@ -96,5 +88,16 @@ public class AuthenticationController {
                 .build();
 
         response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
+    }
+
+    private void deleteRefreshTokenFromCookie(@NonNull HttpServletResponse response){
+        var cookie = ResponseCookie.from("RefreshToken", "")
+                .maxAge(0)
+                .httpOnly(true)
+                .secure(true)
+                .path("/")
+                .build();
+
+        response.setHeader(HttpHeaders.SET_COOKIE, cookie.toString());
     }
 }
