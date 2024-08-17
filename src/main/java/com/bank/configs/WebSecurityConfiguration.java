@@ -20,12 +20,9 @@ import java.util.List;
 @EnableWebSecurity
 public class WebSecurityConfiguration {
     public final JwtAuthenticationFilter _jwtAuthenticationFilter;
-    private final AuthenticationProvider _authenticationProvider;
 
-    public WebSecurityConfiguration(JwtAuthenticationFilter jwtAuthenticationFilter,
-                                    AuthenticationProvider authenticationProvider) {
+    public WebSecurityConfiguration(JwtAuthenticationFilter jwtAuthenticationFilter) {
         _jwtAuthenticationFilter = jwtAuthenticationFilter;
-        _authenticationProvider = authenticationProvider;
     }
 
     @Bean
@@ -37,8 +34,7 @@ public class WebSecurityConfiguration {
                         .requestMatchers(HttpMethod.POST, "/api/auth/login", "/api/auth/register", "/api/auth/refresh_token").permitAll()
                         .requestMatchers("/error/**").permitAll()
                         .anyRequest().authenticated()
-                )
-                .authenticationProvider(_authenticationProvider);
+                );//.authenticationProvider(_authenticationProvider);
 
         http.addFilterBefore(_jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();

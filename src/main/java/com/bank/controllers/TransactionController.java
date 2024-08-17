@@ -33,12 +33,12 @@ public class TransactionController {
     }
 
     @GetMapping("/by/account")
-    public List<TransactionDto> loadLastTransactions(@RequestParam Long accountId) {
+    public List<TransactionDto> getLastTransactions(@RequestParam Long accountId) {
         return  _transactionService.loadLastAccountTransactions(accountId);
     }
 
     @GetMapping("/by/me")
-    public List<TransactionDto> loadCurrentUserTransactions() {
+    public List<TransactionDto> getCurrentUserTransactions() {
         var currentUserId = _authenticationService.loadCurrentUserId().orElse(null);
         if (currentUserId == null) {
             throw new DomainException("error.auth.credentials.invalid");
@@ -48,13 +48,23 @@ public class TransactionController {
     }
 
     @GetMapping("/by/user")
-    public List<TransactionDto> loadUserTransactions(@RequestParam Long userId) {
+    public List<TransactionDto> getUserTransactions(@RequestParam Long userId) {
         return  _transactionService.loadUserTransactions(userId);
     }
 
     @GetMapping("/by/branch")
-    public List<TransactionDto> loadLastBranchTransactions() {
+    public List<TransactionDto> getLastBranchTransactions() {
         return  _transactionService.loadLastBranchTransactions();
+    }
+
+    @PostMapping("/")
+    public void doTransaction(@RequestBody TransactionDto transactionDto){
+        var currentUserId = _authenticationService.loadCurrentUserId().orElse(null);
+        if (currentUserId == null) {
+            throw new DomainException("error.auth.credentials.invalid");
+        }
+        transactionDto.setUserId(currentUserId);
+        _transactionService.doTransaction(transactionDto);
     }
 
     @PostMapping("/export")
@@ -85,15 +95,5 @@ public class TransactionController {
         catch (IOException | InterruptedException | ExecutionException ex) {
             throw new DomainException("error.public.unexpected");
         }
-    }
-
-    @PostMapping("/")
-    public void doTransaction(@RequestBody TransactionDto transactionDto){
-        var currentUserId = _authenticationService.loadCurrentUserId().orElse(null);
-        if (currentUserId == null) {
-            throw new DomainException("error.auth.credentials.invalid");
-        }
-        transactionDto.setUserId(currentUserId);
-        _transactionService.doTransaction(transactionDto);
     }
 }

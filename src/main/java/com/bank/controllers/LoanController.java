@@ -35,27 +35,27 @@ public class LoanController {
     }
 
     @GetMapping({"/"})
-    public List<LoanDto> loadLoans() {
+    public List<LoanDto> getLoans() {
         return _loanService.loadLoans();
     }
 
     @GetMapping({"/{id}"})
-    public LoanDto loadLoan(@PathVariable Long id) {
+    public LoanDto getLoan(@PathVariable Long id) {
         return _loanService.loadLoan(id);
     }
 
     @GetMapping({"/by/account"})
-    public List<LoanDto> loadLoansByAccountId(@RequestParam Long accountId) {
+    public List<LoanDto> getLoansByAccountId(@RequestParam Long accountId) {
         return _loanService.loadLoansByAccountId(accountId);
     }
 
     @GetMapping({"/by/customer"})
-    public List<LoanDto> loadLoansByCustomerId(@RequestParam Long accountId) {
+    public List<LoanDto> getLoansByCustomerId(@RequestParam Long accountId) {
         return _loanService.loadLoansByCustomerId(accountId);
     }
 
     @GetMapping({"/conditions"})
-    public LoanConditionsDto loadLoansByCustomerId(@RequestParam String currency) {
+    public LoanConditionsDto getLoansByCustomerId(@RequestParam String currency) {
         Currencies currencyEnum = null;
         if (currency != null) {
             currencyEnum = Currencies.valueOf(currency);
@@ -70,7 +70,7 @@ public class LoanController {
     }
 
     @GetMapping({"/installments"})
-    public List<InstallmentDto> loadInstallments(@RequestParam Long loanId) {
+    public List<InstallmentDto> getInstallments(@RequestParam Long loanId) {
         return _installmentService.loadInstallments(loanId);
     }
 
