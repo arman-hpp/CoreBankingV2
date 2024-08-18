@@ -28,7 +28,7 @@ public class UserController {
 
     @PostMapping("/")
     public UserDto editUser(@RequestBody UserDto userDto) {
-        return _userService.EditUser(userDto);
+        return _userService.editUser(userDto);
     }
 
     @DeleteMapping("/{id}")

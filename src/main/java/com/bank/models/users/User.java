@@ -71,12 +71,12 @@ public class User extends BaseEntity implements UserDetails {
 
     @Override
     public boolean isAccountNonExpired() {
-        return getUserState() != UserState.Expired;
+        return getUserState() != UserState.EXPIRED;
     }
 
     @Override
     public boolean isAccountNonLocked() {
-        return getUserState() != UserState.Locked;
+        return getUserState() != UserState.LOCKED;
     }
 
     @Override
@@ -93,18 +93,18 @@ public class User extends BaseEntity implements UserDetails {
 
     @Override
     public boolean isEnabled() {
-        return getUserState() == UserState.Enabled;
+        return getUserState() == UserState.ENABLED;
     }
 
     public void unlock() {
         setFailedAttempt(0);
         setLockTime(null);
-        setUserState(UserState.Enabled);
+        setUserState(UserState.ENABLED);
     }
 
     public void lock() {
         setLockTime(LocalDateTime.now());
-        setUserState(UserState.Locked);
+        setUserState(UserState.LOCKED);
     }
 
     public void increaseFailedAttempts() {

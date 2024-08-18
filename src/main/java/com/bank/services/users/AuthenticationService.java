@@ -11,6 +11,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -43,31 +44,32 @@ public class AuthenticationService  {
     }
 
     public UserLoginOutputDto authenticate(UserLoginInputDto input) {
+        Authentication authentication;
         try {
-            var authentication = _authenticationManager.authenticate(
+            authentication = _authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(input.getUsername(), input.getPassword())
             );
-
-            var principal = authentication.getPrincipal();
-            if (principal == null) {
-                throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
-            }
-
-            if (!(principal instanceof User user)) {
-                throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
-            }
-
-            var accessToken = _tokenService.generateAccessToken(user);
-            var refreshToken = _tokenService.generateRefreshToken(user);
-            var refreshTokenExpiration = _tokenService.getRefreshTokenExpiration();
-
-            logSuccessfulLogin(user.getUsername(), accessToken, refreshToken);
-
-            return new UserLoginOutputDto(input.getUsername(), accessToken, refreshToken, refreshTokenExpiration);
         } catch (AuthenticationException ex) {
             logFailedLogin(input.getUsername());
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
         }
+
+        var principal = authentication.getPrincipal();
+        if (principal == null) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
+        }
+
+        if (!(principal instanceof User user)) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
+        }
+
+        var accessToken = _tokenService.generateAccessToken(user);
+        var refreshToken = _tokenService.generateRefreshToken(user);
+        var refreshTokenExpiration = _tokenService.getRefreshTokenExpiration();
+
+        logSuccessfulLogin(user, accessToken, refreshToken);
+
+        return new UserLoginOutputDto(input.getUsername(), accessToken, refreshToken, refreshTokenExpiration);
     }
 
     public AccessTokenDto reAuthenticate(RefreshTokenInputDto input) {
@@ -95,7 +97,7 @@ public class AuthenticationService  {
 
         var newAccessToken = _tokenService.generateAccessToken(user);
 
-        logSuccessfulReLogin(username, newAccessToken);
+        logSuccessfulReLogin(user, newAccessToken);
 
         return new AccessTokenDto(username, newAccessToken);
     }
@@ -113,36 +115,27 @@ public class AuthenticationService  {
     }
 
     private void logFailedLogin(String username) {
-        try {
-            var user = _userRepository.findByUsername(username).orElse(null);
-            if (user == null) {
-                return;
-            }
-
-            if (user.isEnabled() && user.isAccountNonLocked()) {
-                if (user.isFailedAttemptsExceeded()) {
-                    user.lock();
-                } else {
-                    user.increaseFailedAttempts();
-                }
-            } else if (!user.isAccountNonLocked()) {
-                if (user.isLockTimeFinished()) {
-                    user.unlock();
-                }
-            }
-
-            _userRepository.save(user);
-        } catch (Exception ex) {
-            // ignore
-        }
-    }
-
-    private void logSuccessfulLogin(String username, String accessToken, String refreshToken) {
         var user = _userRepository.findByUsername(username).orElse(null);
         if (user == null) {
             return;
         }
 
+        if (user.isEnabled() && user.isAccountNonLocked()) {
+            if (user.isFailedAttemptsExceeded()) {
+                user.lock();
+            } else {
+                user.increaseFailedAttempts();
+            }
+        } else if (!user.isAccountNonLocked()) {
+            if (user.isLockTimeFinished()) {
+                user.unlock();
+            }
+        }
+
+        _userRepository.save(user);
+    }
+
+    private void logSuccessfulLogin(User user, String accessToken, String refreshToken) {
         user.setFailedAttempt(0);
         user.setLastLoginDate(LocalDateTime.now());
         user.setAccessToken(accessToken);
@@ -151,12 +144,7 @@ public class AuthenticationService  {
         _userRepository.save(user);
     }
 
-    private void logSuccessfulReLogin(String username, String accessToken) {
-        var user = _userRepository.findByUsername(username).orElse(null);
-        if (user == null) {
-            return;
-        }
-
+    private void logSuccessfulReLogin(User user, String accessToken) {
         user.setAccessToken(accessToken);
 
         _userRepository.save(user);
@@ -245,7 +233,7 @@ public class AuthenticationService  {
         var user = _modelMapper.map(userRegisterInputDto, User.class);
         user.setUserType(UserTypes.ROLE_USER);
         user.setPassword(_passwordEncoder.encode(userRegisterInputDto.getPassword()));
-        user.setUserState(UserState.Enabled);
+        user.setUserState(UserState.ENABLED);
         user.setFailedAttempt(0);
         user.setLastPasswordChangedDate(LocalDateTime.now());
 

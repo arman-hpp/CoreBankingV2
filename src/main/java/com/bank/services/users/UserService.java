@@ -66,10 +66,6 @@ public class UserService  {
         return userDto;
     }
 
-    public UserDto EditUser(UserDto userDto) {
-            return editUser(userDto);
-    }
-
     public Boolean isAdmin(Long userId) {
         var user = _userRepository.findById(userId).orElse(null);
         if(user == null)

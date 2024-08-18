@@ -1,6 +1,6 @@
 package com.bank.enums.accounts;
 
 public enum AccountTypes {
-    CustomerAccount,
-    BankAccount
+    CUSTOMER_ACCOUNT,
+    BANK_ACCOUNT
 }

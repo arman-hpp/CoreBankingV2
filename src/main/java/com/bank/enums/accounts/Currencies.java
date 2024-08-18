@@ -1,8 +1,8 @@
 package com.bank.enums.accounts;
 
 public enum Currencies {
-    Rial("R"),
-    Dollar("$");
+    RIAL("R"),
+    DOLLAR("$");
 
     private final String symbol;
 

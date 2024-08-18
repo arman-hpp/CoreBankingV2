@@ -87,7 +87,7 @@ public class AccountService {
     }
 
     public AccountDto loadBankAccount(Currencies currency) {
-        var account = _accountRepository.findByAccountTypeAndCurrency(AccountTypes.BankAccount, currency).orElse(null);
+        var account = _accountRepository.findByAccountTypeAndCurrency(AccountTypes.BANK_ACCOUNT, currency).orElse(null);
         if(account == null)
             throw new DomainException("error.account.notFound");
 
@@ -96,7 +96,7 @@ public class AccountService {
 
     public PagedResponseDto<AccountDto> loadBankAccounts(int page, int size) {
         var pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "Id"));
-        var accounts = _accountRepository.findByAccountType(AccountTypes.BankAccount, pageable);
+        var accounts = _accountRepository.findByAccountType(AccountTypes.BANK_ACCOUNT, pageable);
         var results = accounts.map(account -> _modelMapper.map(account, AccountDto.class));
         return new PagedResponseDto<>(results);
     }
@@ -108,7 +108,7 @@ public class AccountService {
 
         var account = _modelMapper.map(accountDto, Account.class);
         account.setBalance(BigDecimal.valueOf(0L));
-        account.setAccountType(AccountTypes.CustomerAccount);
+        account.setAccountType(AccountTypes.CUSTOMER_ACCOUNT);
         account.setCustomer(new Customer(accountDto.getCustomerId()));
 
         _accountRepository.save(account);

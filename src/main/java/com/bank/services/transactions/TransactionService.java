@@ -73,11 +73,11 @@ public class TransactionService {
 
     @Transactional
     public void transfer(TransferDto transferDto) {
-        var srcTransaction = new TransactionDto(transferDto.getAmount(), TransactionTypes.Debit,
+        var srcTransaction = new TransactionDto(transferDto.getAmount(), TransactionTypes.DEBIT,
                 transferDto.getSrcDescription(), transferDto.getSrcAccountId(),
                 transferDto.getUserId(), transferDto.getSrcTraceNo(), transferDto.getCurrency());
 
-        var desTransaction = new TransactionDto(transferDto.getAmount(), TransactionTypes.Credit,
+        var desTransaction = new TransactionDto(transferDto.getAmount(), TransactionTypes.CREDIT,
                 transferDto.getDesDescription(), transferDto.getDesAccountId(),
                 transferDto.getUserId(), transferDto.getDesTraceNo(), transferDto.getCurrency());
 
@@ -94,9 +94,9 @@ public class TransactionService {
         if(account.getCurrency() != transactionDto.getCurrency())
             throw new DomainException("error.transaction.currency.mismatch");
 
-        if(transactionDto.getTransactionType() == TransactionTypes.Credit) {
+        if(transactionDto.getTransactionType() == TransactionTypes.CREDIT) {
             account.setBalance(account.getBalance().add(transactionDto.getAmount()));
-        } else if (transactionDto.getTransactionType() == TransactionTypes.Debit) {
+        } else if (transactionDto.getTransactionType() == TransactionTypes.DEBIT) {
             if(account.getBalance().compareTo(transactionDto.getAmount()) < 0)
                 throw new DomainException("error.transaction.balance.notEnough");
 
