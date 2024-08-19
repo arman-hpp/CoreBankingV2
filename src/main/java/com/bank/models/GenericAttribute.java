@@ -13,6 +13,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Getter
 @ToString
+@SuppressWarnings("JpaDataSourceORMInspection")
 public class GenericAttribute extends AuditableObject {
     @Column(name = "attr_group", length = 21)
     private String group ;

@@ -9,6 +9,7 @@ import lombok.Setter;
 @Setter
 @Entity
 @Table(name = "Cities")
+@SuppressWarnings("JpaDataSourceORMInspection")
 public class City extends BaseEntity {
     @Column(name = "name", length = 100)
     private String name;

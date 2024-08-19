@@ -3,14 +3,10 @@ package com.bank.models.ledgers;
 import com.bank.enums.ledgers.LedgerNatures;
 import com.bank.enums.ledgers.LedgerTypes;
 import com.bank.models.BaseEntity;
-import com.bank.models.accounts.Account;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-
-import java.util.HashSet;
-import java.util.Set;
 
 @Getter
 @Setter

@@ -12,6 +12,7 @@ import java.util.Set;
 @Setter
 @Entity
 @Table(name = "Provinces")
+@SuppressWarnings("JpaDataSourceORMInspection")
 public class Province extends BaseEntity {
     @Column(name = "name", length = 100)
     private String name;

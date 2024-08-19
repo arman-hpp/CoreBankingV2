@@ -2,15 +2,17 @@ package com.bank.models.common;
 
 import com.bank.models.AuditableObject;
 import jakarta.persistence.*;
-import lombok.*;
-
-import java.time.LocalDateTime;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 @Embeddable
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
 @ToString
+@SuppressWarnings("JpaDataSourceORMInspection")
 public class Address extends AuditableObject {
     @Column(name = "alias", length = 50)
     private String alias;

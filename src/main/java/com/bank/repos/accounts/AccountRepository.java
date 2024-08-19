@@ -3,14 +3,12 @@ package com.bank.repos.accounts;
 import com.bank.enums.accounts.AccountTypes;
 import com.bank.enums.accounts.Currencies;
 import com.bank.models.accounts.Account;
+import com.bank.repos.BaseRepository;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
-import com.bank.repos.BaseRepository;
 
-import org.springframework.data.domain.Pageable;
-
-import java.util.List;
 import java.util.Optional;
 
 @Repository

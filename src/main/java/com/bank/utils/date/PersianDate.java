@@ -75,6 +75,7 @@ public final class PersianDate implements Serializable, Comparable<PersianDate> 
     /**
      * Author: JDF.SCR.IR =>> Download Full Version :  <a href="http://jdf.scr.ir/jdf">...</a> License: GNU/LGPL _ Open
      * Source & Free :: Version: 2.80 : [2020=1399]
+     * @noinspection DuplicatedCode
      */
     private static int[] gregorian_to_jalali(int gy, int gm, int gd) {
         int[] out = {
@@ -111,6 +112,7 @@ public final class PersianDate implements Serializable, Comparable<PersianDate> 
     /**
      * Author: JDF.SCR.IR =>> Download Full Version :  <a href="http://jdf.scr.ir/jdf">...</a> License: GNU/LGPL _ Open
      * Source & Free :: Version: 2.80 : [2020=1399]
+     * @noinspection DuplicatedCode
      */
     private static int[] jalali_to_gregorian(int jy, int jm, int jd) {
         jy += 1595;

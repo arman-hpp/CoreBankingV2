@@ -18,6 +18,7 @@ import java.util.Set;
 @Setter
 @Entity
 @Table(name = "Loans")
+@SuppressWarnings("JpaDataSourceORMInspection")
 public class Loan extends BaseEntity {
     @Column(name = "amount", nullable = false, precision = 15, scale = 2)
     private BigDecimal amount;
