@@ -71,8 +71,8 @@ public class ExcelExporter implements IExporter {
         switch (value) {
             case Integer i -> cell.setCellValue(i);
             case Long l -> cell.setCellValue(l);
-            case LocalDateTime localDateTime -> cell.setCellValue(LocalDateTime.parse(value.toString()));
-            case LocalDate localDate -> cell.setCellValue(LocalDate.parse(value.toString()));
+            case LocalDateTime ldt -> cell.setCellValue(ldt);
+            case LocalDate ld -> cell.setCellValue(ld);
             case Boolean b -> cell.setCellValue(b);
             case null, default -> cell.setCellValue(String.valueOf(value));
         }
