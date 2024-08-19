@@ -23,8 +23,6 @@ public class CustomerService {
     private final CustomerRepository _customerRepository;
     private final ModelMapper _modelMapper;
 
-    //private static final Logger log = LoggerFactory.getLogger(CustomerService.class);
-
     public CustomerService(CustomerRepository customerRepository, ModelMapper modelMapper) {
         _customerRepository = customerRepository;
         _modelMapper = modelMapper;
@@ -88,12 +86,10 @@ public class CustomerService {
         if (customer == null)
             throw new DomainException("error.customer.notFound");
 
-        try
-        {
+        try {
             _customerRepository.delete(customer);
         }
-        catch (DataIntegrityViolationException ex)
-        {
+        catch (DataIntegrityViolationException ex) {
             throw new DomainException("error.public.dependent.entity");
         }
     }

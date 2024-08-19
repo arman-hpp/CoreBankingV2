@@ -1,6 +1,7 @@
 package com.bank.controllers;
 
 import com.bank.dtos.PagedResponseDto;
+import com.bank.dtos.users.EditUserInputDto;
 import com.bank.dtos.users.UserDto;
 import com.bank.services.users.UserService;
 import org.springframework.web.bind.annotation.*;
@@ -27,7 +28,7 @@ public class UserController {
     }
 
     @PostMapping("/")
-    public UserDto editUser(@RequestBody UserDto userDto) {
+    public UserDto editUser(@RequestBody EditUserInputDto userDto) {
         return _userService.editUser(userDto);
     }
 

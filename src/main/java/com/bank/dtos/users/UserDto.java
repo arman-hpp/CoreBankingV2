@@ -14,7 +14,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @Getter
 @Setter
-public final class UserDto extends BaseDto {
+public class UserDto extends BaseDto {
     private Long id;
     private String username;
     private String password;
