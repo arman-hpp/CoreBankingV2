@@ -15,8 +15,4 @@ public class CustomerDto extends BaseDto {
     private String firstName;
     private String lastName;
     private String address;
-
-    public String getFullName() {
-        return getFirstName() + " " + getLastName();
-    }
 }
