@@ -13,10 +13,7 @@ import lombok.Setter;
 @Setter
 public class BaseFilterDto extends BaseDto {
     private String name;
-
     private FilterComparators comparator;
-
     private Object value;
-
     private Object value2;
 }

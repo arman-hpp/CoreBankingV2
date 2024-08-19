@@ -13,7 +13,7 @@ import java.math.BigDecimal;
 @NoArgsConstructor
 @Getter
 @Setter
-public final class LoanInterestStatisticsDto extends BaseDto {
+public class LoanInterestStatisticsDto extends BaseDto {
     private Currencies currency;
     private BigDecimal sumInterest;
 }

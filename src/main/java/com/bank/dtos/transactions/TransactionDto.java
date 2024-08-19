@@ -15,7 +15,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @Getter
 @Setter
-public final class TransactionDto extends BaseDto {
+public class TransactionDto extends BaseDto {
     private Long id;
     private BigDecimal amount;
     private TransactionTypes transactionType;

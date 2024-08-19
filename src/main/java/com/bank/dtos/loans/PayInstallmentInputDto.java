@@ -13,7 +13,7 @@ import java.math.BigDecimal;
 @NoArgsConstructor
 @Getter
 @Setter
-public final class PayInstallmentInputDto extends BaseDto {
+public class PayInstallmentInputDto extends BaseDto {
     private Long loanId;
     private Long accountId;
     private Integer InstallmentCount;

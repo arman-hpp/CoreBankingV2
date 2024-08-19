@@ -13,7 +13,7 @@ import java.util.List;
 @NoArgsConstructor
 @Getter
 @Setter
-public final class LoanPaymentInfoDto extends BaseDto {
+public class LoanPaymentInfoDto extends BaseDto {
     private BigDecimal monthlyPaymentAmount;
     private BigDecimal overPaymentAmount;
     private List<InstallmentDto> installments;

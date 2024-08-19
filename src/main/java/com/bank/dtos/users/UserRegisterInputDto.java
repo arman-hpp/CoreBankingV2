@@ -10,7 +10,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @Getter
 @Setter
-public final class UserRegisterInputDto extends BaseDto {
+public class UserRegisterInputDto extends BaseDto {
     private String username;
     private String password;
     private String repeatPassword;

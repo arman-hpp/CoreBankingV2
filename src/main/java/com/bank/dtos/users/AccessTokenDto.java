@@ -11,6 +11,6 @@ import lombok.Setter;
 @Getter
 @Setter
 public class AccessTokenDto extends BaseDto {
-    public String username;
-    public String accessToken;
+    private String username;
+    private String accessToken;
 }

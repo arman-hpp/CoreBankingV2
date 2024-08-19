@@ -10,6 +10,6 @@ import lombok.Setter;
 @NoArgsConstructor
 @Getter
 @Setter
-public final class LoanSearchInputDto extends BaseDto {
+public class LoanSearchInputDto extends BaseDto {
     private Long loanId;
 }

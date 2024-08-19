@@ -1,5 +1,8 @@
 package com.bank.exporters;
 
+import lombok.Getter;
+
+@Getter
 public enum ExportTypes {
     Excel(".xlsx"),
     CSV(".csv"),
@@ -11,7 +14,4 @@ public enum ExportTypes {
         this.fileExtension = fileExtension;
     }
 
-    public String getFileExtension() {
-        return fileExtension;
-    }
 }

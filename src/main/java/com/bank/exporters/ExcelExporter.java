@@ -68,22 +68,13 @@ public class ExcelExporter implements IExporter {
     private static void createCell(Row row, int columnCount, Object value, CellStyle style) {
         var cell = row.createCell(columnCount);
 
-        if (value instanceof Integer) {
-            cell.setCellValue((Integer) value);
-        }
-        else if (value instanceof Long) {
-            cell.setCellValue((Long) value);
-        }
-        else if (value instanceof LocalDateTime) {
-            cell.setCellValue(LocalDateTime.parse(value.toString()));
-        }
-        else if (value instanceof LocalDate) {
-            cell.setCellValue(LocalDate.parse(value.toString()));
-        }
-        else if (value instanceof Boolean) {
-            cell.setCellValue((Boolean) value);
-        } else {
-            cell.setCellValue(String.valueOf(value));
+        switch (value) {
+            case Integer i -> cell.setCellValue(i);
+            case Long l -> cell.setCellValue(l);
+            case LocalDateTime localDateTime -> cell.setCellValue(LocalDateTime.parse(value.toString()));
+            case LocalDate localDate -> cell.setCellValue(LocalDate.parse(value.toString()));
+            case Boolean b -> cell.setCellValue(b);
+            case null, default -> cell.setCellValue(String.valueOf(value));
         }
 
         cell.setCellStyle(style);

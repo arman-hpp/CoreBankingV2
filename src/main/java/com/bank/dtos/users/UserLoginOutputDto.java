@@ -11,8 +11,8 @@ import lombok.Setter;
 @Getter
 @Setter
 public class UserLoginOutputDto extends BaseDto {
-    public String username;
-    public String accessToken;
-    public String refreshToken;
-    public Integer refreshTokenExpiration;
+    private String username;
+    private String accessToken;
+    private String refreshToken;
+    private Integer refreshTokenExpiration;
 }

@@ -14,8 +14,6 @@ import java.util.ArrayList;
 @Setter
 public class FilterInfoDto extends BaseDto {
     private ArrayList<BaseFilterDto> filters;
-
     private FilerPageDto filterPage;
-
     private FilterSortDto filterSort;
 }

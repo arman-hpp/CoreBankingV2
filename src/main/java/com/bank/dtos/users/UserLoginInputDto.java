@@ -8,7 +8,7 @@ import lombok.*;
 @RequiredArgsConstructor
 @Getter
 @Setter
-public final class UserLoginInputDto extends BaseDto {
+public class UserLoginInputDto extends BaseDto {
     @NonNull
     private String username;
     private String password;

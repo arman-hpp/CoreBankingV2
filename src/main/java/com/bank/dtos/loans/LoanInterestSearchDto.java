@@ -13,9 +13,9 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @Getter
 @Setter
-public final class LoanInterestSearchDto extends BaseDto {
+public class LoanInterestSearchDto extends BaseDto {
     @DateTimeFormat(pattern ="yyyy-MM-dd'T'HH:mm")
-    public LocalDateTime fromDate;
+    private LocalDateTime fromDate;
     @DateTimeFormat(pattern ="yyyy-MM-dd'T'HH:mm")
-    public LocalDateTime toDate;
+    private LocalDateTime toDate;
 }

@@ -108,7 +108,7 @@ public class LoanController {
     @PostMapping({"/calcInterests"})
     public List<LoanInterestStatisticsDto> calcInterests(@RequestBody LoanInterestSearchDto loanInterestSearchDto) {
         var future = _loanService
-                .loadLoanSumInterests(loanInterestSearchDto.fromDate, loanInterestSearchDto.toDate);
+                .loadLoanSumInterests(loanInterestSearchDto.getFromDate(), loanInterestSearchDto.getToDate());
 
         try {
             return future.get();

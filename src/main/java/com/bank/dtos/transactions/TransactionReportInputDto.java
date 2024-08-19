@@ -13,11 +13,10 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @Getter
 @Setter
-public final class TransactionReportInputDto extends BaseDto {
+public class TransactionReportInputDto extends BaseDto {
     @DateTimeFormat(pattern ="yyyy-MM-dd'T'HH:mm")
     private LocalDateTime fromDate;
     @DateTimeFormat(pattern ="yyyy-MM-dd'T'HH:mm")
     private LocalDateTime toDate;
-
     private String exportType;
 }

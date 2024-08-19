@@ -16,7 +16,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @Getter
 @Setter
-public final class InstallmentDto extends BaseDto {
+public class InstallmentDto extends BaseDto {
     private Integer installmentNo;
     @DateTimeFormat(pattern ="yyyy-MM-dd")
     private LocalDate dueDate;

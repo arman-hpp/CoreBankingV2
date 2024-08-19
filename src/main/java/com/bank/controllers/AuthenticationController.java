@@ -28,7 +28,7 @@ public class AuthenticationController {
     public AccessTokenDto login(HttpServletResponse response, @RequestBody UserLoginInputDto input) {
         var userLoginDto = _authenticationService.authenticate(input);
         addRefreshTokenToCookie(response, userLoginDto.getRefreshToken(), userLoginDto.getRefreshTokenExpiration());
-        return new AccessTokenDto(userLoginDto.getUsername(), userLoginDto.accessToken);
+        return new AccessTokenDto(userLoginDto.getUsername(), userLoginDto.getAccessToken());
     }
 
     @PostMapping("/register")

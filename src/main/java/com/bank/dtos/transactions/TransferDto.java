@@ -13,7 +13,7 @@ import java.math.BigDecimal;
 @NoArgsConstructor
 @Getter
 @Setter
-public final class TransferDto extends BaseDto {
+public class TransferDto extends BaseDto {
     private BigDecimal amount;
     private String srcDescription;
     private String desDescription;

@@ -1,5 +1,6 @@
 package com.bank.exceptions;
 
+import lombok.Getter;
 import org.jetbrains.annotations.PropertyKey;
 import org.springframework.context.MessageSource;
 import org.springframework.context.support.ReloadableResourceBundleMessageSource;
@@ -9,6 +10,7 @@ import java.util.Locale;
 @SuppressWarnings("unused")
 public class DomainException extends RuntimeException {
     private final MessageSource _messageSource;
+    @Getter
     private final String resourceKey;
     private final Object[] args;
 
@@ -22,10 +24,6 @@ public class DomainException extends RuntimeException {
         messageSource.setDefaultEncoding("UTF-8");
         //messageSource.setCacheMillis(500);
         _messageSource = messageSource;
-    }
-
-    public String getResourceKey() {
-        return resourceKey;
     }
 
     @Override

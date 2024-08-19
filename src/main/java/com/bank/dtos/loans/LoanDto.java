@@ -16,7 +16,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @Getter
 @Setter
-public final class LoanDto extends BaseDto {
+public class LoanDto extends BaseDto {
     private Long id;
     private BigDecimal amount;
     private BigDecimal interestRate;

@@ -1,5 +1,8 @@
 package com.bank.enums.accounts;
 
+import lombok.Getter;
+
+@Getter
 public enum Currencies {
     RIAL("R"),
     DOLLAR("$");
@@ -8,10 +11,6 @@ public enum Currencies {
 
     Currencies(String symbol) {
         this.symbol = symbol;
-    }
-
-    public String getSymbol() {
-        return symbol;
     }
 }
 
