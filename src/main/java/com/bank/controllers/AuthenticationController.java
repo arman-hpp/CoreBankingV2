@@ -3,20 +3,27 @@ package com.bank.controllers;
 import com.bank.dtos.users.*;
 import com.bank.exceptions.DomainException;
 import com.bank.services.users.AuthenticationService;
+import com.bank.services.users.CaptchaService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
+import org.springframework.http.ResponseEntity;
 import org.springframework.lang.NonNull;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/auth")
 public class AuthenticationController {
     private final AuthenticationService _authenticationService;
+    private final CaptchaService _captchaService;
 
-    public AuthenticationController(AuthenticationService authenticationService) {
+    public AuthenticationController(AuthenticationService authenticationService,
+                                    CaptchaService captchaService) {
         _authenticationService = authenticationService;
+        _captchaService = captchaService;
     }
 
     @GetMapping({"/", "/me"})
@@ -24,8 +31,17 @@ public class AuthenticationController {
         return _authenticationService.loadCurrentUser();
     }
 
+    @GetMapping("/captcha")
+    public ResponseEntity<Map<String, String>> getCaptcha() {
+        return ResponseEntity.ok(_captchaService.generateCaptcha());
+    }
+
     @PostMapping("/login")
     public AccessTokenDto login(HttpServletResponse response, @RequestBody UserLoginInputDto input) {
+        if(!_captchaService.VerifyCaptcha(input.getCaptchaToken(), input.getCaptchaAnswer())){
+            throw new DomainException("error.auth.captcha.invalid");
+        }
+
         var userLoginDto = _authenticationService.authenticate(input);
         addRefreshTokenToCookie(response, userLoginDto.getRefreshToken(), userLoginDto.getRefreshTokenExpiration());
         return new AccessTokenDto(userLoginDto.getUsername(), userLoginDto.getAccessToken());

@@ -2,14 +2,12 @@ package com.bank.services.users;
 
 import com.bank.utils.utils.JwtUtils;
 import io.jsonwebtoken.*;
-import io.jsonwebtoken.io.Decoders;
-import io.jsonwebtoken.security.Keys;
 import lombok.Getter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
-import javax.crypto.SecretKey;
+import java.util.HashMap;
 
 @Service
 public class TokenService {
@@ -17,7 +15,7 @@ public class TokenService {
     private String accessTokenSecretKey;
 
     @Value("${security.jwt.refresh-token.secret-key}")
-    private String refreshTokenSecretKet;
+    private String refreshTokenSecretKey;
 
     @Value("${security.jwt.access-token.expiration-time}")
     private Integer accessTokenExpiration;
@@ -27,36 +25,28 @@ public class TokenService {
     private Integer refreshTokenExpiration;
 
     public String generateAccessToken(UserDetails userDetails) {
-        return JwtUtils.generateToken(userDetails, accessTokenExpiration, getAccessTokenSignInKey());
+        return JwtUtils.generateToken(
+                userDetails.getUsername(), accessTokenExpiration, accessTokenSecretKey, new HashMap<>());
     }
 
     public String generateRefreshToken(UserDetails userDetails) {
-        return JwtUtils.generateToken(userDetails, refreshTokenExpiration, getRefreshTokenSignInKey());
+        return JwtUtils.generateToken(
+                userDetails.getUsername(), refreshTokenExpiration, refreshTokenSecretKey, new HashMap<>());
     }
 
     public boolean isAccessTokenTokenValid(String token) {
-        return JwtUtils.isTokenValid(token, getAccessTokenSignInKey());
+        return JwtUtils.isTokenValid(token, accessTokenSecretKey);
     }
 
     public boolean isRefreshTokenTokenValid(String token) {
-        return JwtUtils.isTokenValid(token, getRefreshTokenSignInKey());
+        return JwtUtils.isTokenValid(token, refreshTokenSecretKey);
     }
 
     public String extractUsernameFromAccessToken(String token) {
-        return JwtUtils.extractClaim(token, getAccessTokenSignInKey(), Claims::getSubject);
+        return JwtUtils.extractClaim(token, accessTokenSecretKey, Claims::getSubject);
     }
 
     public String extractUsernameFromRefreshToken(String token) {
-        return JwtUtils.extractClaim(token, getRefreshTokenSignInKey(), Claims::getSubject);
-    }
-
-    private SecretKey getAccessTokenSignInKey() {
-        var keyBytes = Decoders.BASE64.decode(accessTokenSecretKey);
-        return Keys.hmacShaKeyFor(keyBytes);
-    }
-
-    private SecretKey getRefreshTokenSignInKey() {
-        var keyBytes = Decoders.BASE64.decode(refreshTokenSecretKet);
-        return Keys.hmacShaKeyFor(keyBytes);
+        return JwtUtils.extractClaim(token, refreshTokenSecretKey, Claims::getSubject);
     }
 }

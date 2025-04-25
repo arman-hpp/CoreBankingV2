@@ -30,6 +30,7 @@ public class WebSecurityConfiguration {
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests((requests) -> requests
                         .requestMatchers("/h2/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/auth/captcha").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/auth/login", "/api/auth/register", "/api/auth/refresh_token").permitAll()
                         .requestMatchers("/error/**").permitAll()
                         .anyRequest().authenticated()

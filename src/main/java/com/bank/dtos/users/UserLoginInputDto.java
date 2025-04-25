@@ -12,6 +12,6 @@ public class UserLoginInputDto extends BaseDto {
     @NonNull
     private String username;
     private String password;
-    private String captchaImage;
-    private String captcha;
+    private String captchaToken;
+    private String captchaAnswer;
 }
