@@ -4,10 +4,9 @@ import com.bank.dtos.users.*;
 import com.bank.exceptions.DomainException;
 import com.bank.services.users.AuthenticationService;
 import com.bank.services.users.CaptchaService;
+import com.bank.services.users.RefreshTokenCookieService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.lang.NonNull;
 import org.springframework.web.bind.annotation.*;
@@ -18,11 +17,14 @@ import java.util.Map;
 @RequestMapping("/api/auth")
 public class AuthenticationController {
     private final AuthenticationService _authenticationService;
+    private final RefreshTokenCookieService _refreshTokenCookieService;
     private final CaptchaService _captchaService;
 
     public AuthenticationController(AuthenticationService authenticationService,
+                                    RefreshTokenCookieService refreshTokenCookieService,
                                     CaptchaService captchaService) {
         _authenticationService = authenticationService;
+        _refreshTokenCookieService = refreshTokenCookieService;
         _captchaService = captchaService;
     }
 
@@ -43,7 +45,7 @@ public class AuthenticationController {
         }
 
         var userLoginDto = _authenticationService.authenticate(input);
-        addRefreshTokenToCookie(response, userLoginDto.getRefreshToken(), userLoginDto.getRefreshTokenExpiration());
+        _refreshTokenCookieService.addRefreshToken(response, userLoginDto.getRefreshToken(), userLoginDto.getRefreshTokenExpiration());
         return new AccessTokenDto(userLoginDto.getUsername(), userLoginDto.getAccessToken());
     }
 
@@ -65,7 +67,7 @@ public class AuthenticationController {
 
     @PostMapping("/refresh_token")
     public AccessTokenDto refreshToken(HttpServletRequest request) {
-        var refreshToken = getRefreshTokenFromCookie(request);
+        var refreshToken = _refreshTokenCookieService.getRefreshToken(request);
         var input = new RefreshTokenInputDto(refreshToken);
 
         return _authenticationService.reAuthenticate(input);
@@ -79,41 +81,6 @@ public class AuthenticationController {
         }
 
         _authenticationService.revokeAuthenticate(userId);
-        deleteRefreshTokenFromCookie(response);
-    }
-
-    private String getRefreshTokenFromCookie(@NonNull HttpServletRequest request) {
-        var cookies = request.getCookies();
-        if (cookies != null) {
-            for (var cookie : cookies) {
-                if (cookie.getName().equals("RefreshToken")) {
-                    return cookie.getValue();
-                }
-            }
-        }
-        return null;
-    }
-
-    private void addRefreshTokenToCookie(@NonNull HttpServletResponse response, String refreshToken, Integer expireTime) {
-        var cookie = ResponseCookie.from("RefreshToken", refreshToken)
-                .httpOnly(true)
-                .secure(true)
-                .path("/")
-                .maxAge(expireTime / 1000)
-                .sameSite("Strict")
-                .build();
-
-        response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
-    }
-
-    private void deleteRefreshTokenFromCookie(@NonNull HttpServletResponse response){
-        var cookie = ResponseCookie.from("RefreshToken", "")
-                .maxAge(0)
-                .httpOnly(true)
-                .secure(true)
-                .path("/")
-                .build();
-
-        response.setHeader(HttpHeaders.SET_COOKIE, cookie.toString());
+        _refreshTokenCookieService.deleteRefreshToken(response);
     }
 }
