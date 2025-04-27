@@ -26,9 +26,9 @@ public class CaptchaService {
     private static final SecureRandom SECURE_RANDOM = new SecureRandom();
 
     private static final List<Font> FONTS = List.of(
-            new Font("Arial", Font.BOLD, 40),
-            new Font("Verdana", Font.BOLD, 40),
-            new Font("Tahoma", Font.BOLD, 40)
+            new Font("Times New Roman", Font.BOLD, 40),
+            new Font("Courier New", Font.BOLD, 40),
+            new Font("Georgia", Font.BOLD, 40)
     );
 
     @Value("${security.jwt.captcha-token.secret-key}")
