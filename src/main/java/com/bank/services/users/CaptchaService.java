@@ -7,7 +7,6 @@ import org.springframework.stereotype.Service;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
-import java.awt.geom.AffineTransform;
 import java.awt.geom.Ellipse2D;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
@@ -39,32 +38,20 @@ public class CaptchaService {
     private Integer captchaTokenExpiration;
 
     public Map<String, String> generateCaptcha() {
-        var captchaText = generateCaptchaText();
-        var image = generateCaptchaImage(captchaText);
-
-        var outputStream = new ByteArrayOutputStream();
-        try {
-            ImageIO.write(image, "png", outputStream);
-        } catch (IOException e) {
-            throw new DomainException("error.auth.captcha.error");
-        }
-
-        var base64Image = BASE64_ENCODER.encodeToString(outputStream.toByteArray());
-
-        Map<String, Object> claims = new HashMap<>();
-        claims.put("captcha", captchaText);
+        var captchaText = createRandomCaptchaText();
+        var captchaImage = createCaptchaImage(captchaText);
+        var base64Image = convertImageToBase64(captchaImage);
 
         var captchaToken = JwtUtils.generateToken(
-                "CAPTCHA", captchaTokenExpiration, captchaTokenSecretKet, claims);
+                "CAPTCHA", captchaTokenExpiration, captchaTokenSecretKet, Map.of("captcha", captchaText));
 
-        Map<String, String> response = new HashMap<>();
-        response.put("image", "data:image/png;base64," + base64Image);
-        response.put("token", captchaToken);
-
-        return response;
+        return Map.of(
+                "image", "data:image/png;base64," + base64Image,
+                "token", captchaToken
+        );
     }
 
-    public boolean VerifyCaptcha(String captchaToken, String captchaAnswer) {
+    public boolean verifyCaptcha(String captchaToken, String captchaAnswer) {
         if(!JwtUtils.isTokenValid(captchaToken, captchaTokenSecretKet)) {
             return false;
         }
@@ -75,99 +62,133 @@ public class CaptchaService {
         return correctCaptcha.trim().equalsIgnoreCase(captchaAnswer);
     }
 
-    private BufferedImage generateCaptchaImage(String text) {
+    private static String createRandomCaptchaText() {
+        var captchaCharsLength = CAPTCHA_CHARS.length();
+        var captchaStr = new StringBuilder();
+        for (var i = 0; i < CAPTCHA_LENGTH; i++) {
+            captchaStr.append(CAPTCHA_CHARS.charAt(SECURE_RANDOM.nextInt(captchaCharsLength)));
+        }
+        return captchaStr.toString();
+    }
+
+    private BufferedImage createCaptchaImage(String text) {
         var image = new BufferedImage(CAPTCHA_WIDTH, CAPTCHA_HEIGHT, BufferedImage.TYPE_3BYTE_BGR);
         var g2d = image.createGraphics();
 
-        // Draw background
-        //g2d.setColor(new Color(240, 240, 240));
-        //g2d.fillRect(0, 0, CAPTCHA_WIDTH, CAPTCHA_HEIGHT);
+        try {
+            drawBackground(g2d);
+            drawCaptchaText(g2d, text);
+            drawNoise(g2d);
+            applyShear(image);
+        } finally {
+            g2d.dispose();
+        }
 
-        // Draw background gradient
-        GradientPaint gp = new GradientPaint(0, 0,
-                new Color(SECURE_RANDOM.nextInt(55) + 200, SECURE_RANDOM.nextInt(55) + 200, SECURE_RANDOM.nextInt(55) + 200),
+        return image;
+    }
+
+    private void drawBackground(Graphics2D g2d) {
+        /*
+        g2d.setColor(new Color(240, 240, 240));
+        g2d.fillRect(0, 0, CAPTCHA_WIDTH, CAPTCHA_HEIGHT);
+        */
+
+        var gp = new GradientPaint(
+                0, 0,
+                generateLightColor(),
                 CAPTCHA_WIDTH, CAPTCHA_HEIGHT,
-                new Color(SECURE_RANDOM.nextInt(55) + 200, SECURE_RANDOM.nextInt(55) + 200, SECURE_RANDOM.nextInt(55) + 200));
+                generateLightColor());
         g2d.setPaint(gp);
         g2d.fillRect(0, 0, CAPTCHA_WIDTH, CAPTCHA_HEIGHT);
+    }
 
-        // Draw CAPTCHA text
-        int xGap = CAPTCHA_WIDTH / (text.length() + 2);
-        for (int i = 0; i < text.length(); i++) {
+    private void drawCaptchaText(Graphics2D g2d, String text) {
+        var xGap = CAPTCHA_WIDTH / (text.length() + 2);
+        for (var i = 0; i < text.length(); i++) {
             g2d.setFont(FONTS.get(SECURE_RANDOM.nextInt(FONTS.size())));
             g2d.setColor(generateRandomColor());
-            double theta = (SECURE_RANDOM.nextDouble() - 0.5) * 0.5;
+            var theta = (SECURE_RANDOM.nextDouble() - 0.5) * 0.5;
             g2d.rotate(theta, (i + 1) * xGap, (double) CAPTCHA_HEIGHT / 2);
             g2d.drawString(String.valueOf(text.charAt(i)), (i + 1) * xGap - 10, CAPTCHA_HEIGHT / 2 + 10);
             g2d.rotate(-theta, (i + 1) * xGap, (double) CAPTCHA_HEIGHT / 2);
         }
+    }
 
+    private void drawNoise(Graphics2D g2d) {
         // Draw random ellipses
-        for (int i = 0; i < 10; i++) {
+        for (var i = 0; i < 10; i++) {
+            var w = SECURE_RANDOM.nextInt(10);
+            var h = SECURE_RANDOM.nextInt(10);
+            var x = SECURE_RANDOM.nextInt(CAPTCHA_WIDTH - w);
+            var y = SECURE_RANDOM.nextInt(CAPTCHA_HEIGHT - h);
             g2d.setColor(generateRandomColor());
-            int w = SECURE_RANDOM.nextInt(20);
-            int h = SECURE_RANDOM.nextInt(20);
-            int x = SECURE_RANDOM.nextInt(CAPTCHA_WIDTH - w);
-            int y = SECURE_RANDOM.nextInt(CAPTCHA_HEIGHT - h);
             g2d.fill(new Ellipse2D.Double(x, y, w, h));
         }
 
         // Draw random lines
         for (var i = 0; i < 10; i++) {
+            var x1 = SECURE_RANDOM.nextInt(CAPTCHA_WIDTH);
+            var y1 = SECURE_RANDOM.nextInt(CAPTCHA_HEIGHT);
+            var x2 = SECURE_RANDOM.nextInt(CAPTCHA_WIDTH);
+            var y2 = SECURE_RANDOM.nextInt(CAPTCHA_HEIGHT);
             g2d.setColor(generateRandomColor());
-            int x1 = SECURE_RANDOM.nextInt(CAPTCHA_WIDTH);
-            int y1 = SECURE_RANDOM.nextInt(CAPTCHA_HEIGHT);
-            int x2 = SECURE_RANDOM.nextInt(CAPTCHA_WIDTH);
-            int y2 = SECURE_RANDOM.nextInt(CAPTCHA_HEIGHT);
             g2d.drawLine(x1, y1, x2, y2);
         }
 
         // Draw random dots
-        for (int i = 0; i < 300; i++) {
-            int x = SECURE_RANDOM.nextInt(CAPTCHA_WIDTH);
-            int y = SECURE_RANDOM.nextInt(CAPTCHA_HEIGHT);
-            int rgb = new Color(
-                    SECURE_RANDOM.nextInt(255), SECURE_RANDOM.nextInt(255), SECURE_RANDOM.nextInt(255)).getRGB();
-            image.setRGB(x, y, rgb);
+        for (var i = 0; i < 300; i++) {
+            var x = SECURE_RANDOM.nextInt(CAPTCHA_WIDTH);
+            var y = SECURE_RANDOM.nextInt(CAPTCHA_HEIGHT);
+            g2d.setColor(generateRandomColor());
+            g2d.drawRect(x, y, 1, 1);
         }
-
-        // Add shear distortion
-        var originalTransform = g2d.getTransform();
-        g2d.setTransform(new AffineTransform());
-        int frames = 20;
-        int period = SECURE_RANDOM.nextInt(10) + 5;
-        int phase = SECURE_RANDOM.nextInt(2);
-        for (int i = 0; i < CAPTCHA_HEIGHT; i++) {
-            double d = (double) (period >> 1) *
-                    Math.sin((double) i / (double) period
-                            + (6.2831853071795862D * (double) phase) / (double) frames);
-            g2d.copyArea(0, i, CAPTCHA_WIDTH, 1, (int) d, 0);
-            g2d.setColor(new Color(240, 240, 240));
-            g2d.drawLine((int) d, i, 0, i);
-            g2d.drawLine((int) d + CAPTCHA_WIDTH, i, CAPTCHA_WIDTH, i);
-        }
-        g2d.setTransform(originalTransform);
-
-        g2d.dispose();
-
-        return image;
     }
 
+    private void applyShear(BufferedImage image) {
+        var frames = 20;
+        var period = SECURE_RANDOM.nextInt(10) + 5;
+        var phase = SECURE_RANDOM.nextInt(2);
+        var copy = new BufferedImage(image.getWidth(), image.getHeight(), image.getType());
+        var gCopy = copy.createGraphics();
+        gCopy.drawImage(image, 0, 0, null);
+        gCopy.dispose();
 
-    private String generateCaptchaText() {
-        var captchaCharsLength = CAPTCHA_CHARS.length();
-        var captchaStr = new StringBuilder();
-        for (int i = 0; i < CAPTCHA_LENGTH; i++) {
-            captchaStr.append(CAPTCHA_CHARS.charAt(SECURE_RANDOM.nextInt(captchaCharsLength)));
+        for (var y = 0; y < CAPTCHA_HEIGHT; y++) {
+            var displacement = (period >> 1) * Math.sin(
+                    (double) y / period + (2 * Math.PI * phase) / frames);
+
+            var dx = (int) displacement;
+            if (dx >= 0) {
+                image.setRGB(dx, y, CAPTCHA_WIDTH - dx, 1, copy.getRGB(0, y, CAPTCHA_WIDTH - dx, 1, null, 0, CAPTCHA_WIDTH), 0, CAPTCHA_WIDTH);
+                image.setRGB(0, y, dx, 1, new int[dx], 0, dx);
+            } else {
+                var absDx = -dx;
+                image.setRGB(0, y, CAPTCHA_WIDTH - absDx, 1, copy.getRGB(absDx, y, CAPTCHA_WIDTH - absDx, 1, null, 0, CAPTCHA_WIDTH), 0, CAPTCHA_WIDTH);
+                image.setRGB(CAPTCHA_WIDTH - absDx, y, absDx, 1, new int[absDx], 0, absDx);
+            }
         }
-        return captchaStr.toString();
+    }
+
+    private String convertImageToBase64(BufferedImage image) {
+        try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
+            ImageIO.write(image, "png", outputStream);
+            return BASE64_ENCODER.encodeToString(outputStream.toByteArray());
+        } catch (IOException e) {
+            throw new DomainException("error.auth.captcha.error");
+        }
     }
 
     private Color generateRandomColor() {
         return new Color(
                 SECURE_RANDOM.nextInt(200),
                 SECURE_RANDOM.nextInt(200),
-                SECURE_RANDOM.nextInt(200)
-        );
+                SECURE_RANDOM.nextInt(200));
+    }
+
+    private Color generateLightColor() {
+        return new Color(
+                SECURE_RANDOM.nextInt(55) + 200,
+                SECURE_RANDOM.nextInt(55) + 200,
+                SECURE_RANDOM.nextInt(55) + 200);
     }
 }

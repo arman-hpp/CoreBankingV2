@@ -40,7 +40,7 @@ public class AuthenticationController {
 
     @PostMapping("/login")
     public AccessTokenDto login(HttpServletResponse response, @RequestBody UserLoginInputDto input) {
-        if(!_captchaService.VerifyCaptcha(input.getCaptchaToken(), input.getCaptchaAnswer())){
+        if(!_captchaService.verifyCaptcha(input.getCaptchaToken(), input.getCaptchaAnswer())){
             throw new DomainException("error.auth.captcha.invalid");
         }
 
