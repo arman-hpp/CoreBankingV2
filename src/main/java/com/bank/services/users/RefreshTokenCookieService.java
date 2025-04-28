@@ -13,7 +13,7 @@ public class RefreshTokenCookieService {
         var cookies = request.getCookies();
         if (cookies != null) {
             for (var cookie : cookies) {
-                if (cookie.getName().equals("RefreshToken")) {
+                if ("RefreshToken".equals(cookie.getName())) {
                     return cookie.getValue();
                 }
             }
@@ -21,12 +21,13 @@ public class RefreshTokenCookieService {
         return null;
     }
 
-    public void addRefreshToken(@NonNull HttpServletResponse response, String refreshToken, Integer expireTime) {
+    public void addRefreshToken(@NonNull HttpServletResponse response, String refreshToken, Integer expireTimeMillis) {
+        var expireTimeSeconds = expireTimeMillis / 1000;
         var cookie = ResponseCookie.from("RefreshToken", refreshToken)
                 .httpOnly(true)
                 .secure(true)
                 .path("/")
-                .maxAge(expireTime / 1000)
+                .maxAge(expireTimeSeconds)
                 .sameSite("Strict")
                 .build();
 
@@ -38,6 +39,7 @@ public class RefreshTokenCookieService {
                 .maxAge(0)
                 .httpOnly(true)
                 .secure(true)
+                .sameSite("Strict")
                 .path("/")
                 .build();
 
