@@ -2,7 +2,7 @@ package com.bank.controllers;
 
 import com.bank.dtos.transactions.TransactionDto;
 import com.bank.dtos.transactions.TransactionReportInputDto;
-import com.bank.exceptions.DomainException;
+import com.bank.exceptions.BusinessException;
 import com.bank.exporters.ExportTypes;
 import com.bank.services.transactions.TransactionService;
 import com.bank.services.users.AuthenticationService;
@@ -41,7 +41,7 @@ public class TransactionController {
     public List<TransactionDto> getCurrentUserTransactions() {
         var currentUserId = _authenticationService.loadCurrentUserId().orElse(null);
         if (currentUserId == null) {
-            throw new DomainException("error.auth.credentials.invalid");
+            throw new BusinessException("error.auth.credentials.invalid");
         }
 
         return  _transactionService.loadUserTransactions(currentUserId);
@@ -61,7 +61,7 @@ public class TransactionController {
     public void doTransaction(@RequestBody TransactionDto transactionDto){
         var currentUserId = _authenticationService.loadCurrentUserId().orElse(null);
         if (currentUserId == null) {
-            throw new DomainException("error.auth.credentials.invalid");
+            throw new BusinessException("error.auth.credentials.invalid");
         }
         transactionDto.setUserId(currentUserId);
         _transactionService.doTransaction(transactionDto);
@@ -93,7 +93,7 @@ public class TransactionController {
             exporter.export(response, TransactionDto.class, transactionDtoList);
         }
         catch (IOException | InterruptedException | ExecutionException ex) {
-            throw new DomainException("error.public.unexpected");
+            throw new BusinessException("error.public.unexpected");
         }
     }
 }

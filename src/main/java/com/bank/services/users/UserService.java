@@ -3,7 +3,7 @@ package com.bank.services.users;
 import com.bank.dtos.PagedResponseDto;
 import com.bank.dtos.users.EditUserInputDto;
 import com.bank.dtos.users.UserDto;
-import com.bank.exceptions.DomainException;
+import com.bank.exceptions.BusinessException;
 import com.bank.repos.users.UserRepository;
 import org.modelmapper.ModelMapper;
 import org.springframework.cache.annotation.CacheEvict;
@@ -37,7 +37,7 @@ public class UserService  {
     public UserDto loadUser(Long userId) {
         var user = _userRepository.findById(userId).orElse(null);
         if(user == null)
-            throw new DomainException("error.auth.notFound");
+            throw new BusinessException("error.auth.notFound");
 
         return _modelMapper.map(user, UserDto.class);
     }
@@ -50,7 +50,7 @@ public class UserService  {
     public UserDto editUser(EditUserInputDto userDto) {
         var user = _userRepository.findById(userDto.getId()).orElse(null);
         if(user == null)
-            throw new DomainException("error.auth.notFound");
+            throw new BusinessException("error.auth.notFound");
 
         _modelMapper.map(userDto, user);
         _userRepository.save(user);
@@ -65,13 +65,13 @@ public class UserService  {
     public void removeUser(Long userId) {
         var user = _userRepository.findById(userId).orElse(null);
         if(user == null)
-            throw new DomainException("error.auth.notFound");
+            throw new BusinessException("error.auth.notFound");
 
         try {
             _userRepository.delete(user);
         }
         catch (DataIntegrityViolationException ex) {
-            throw new DomainException("error.public.dependent.entity");
+            throw new BusinessException("error.public.dependent.entity");
         }
     }
 }

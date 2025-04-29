@@ -6,7 +6,7 @@ import com.bank.enums.transactions.TransactionTypes;
 import com.bank.events.NewTransactionEvent;
 import com.bank.models.transactions.Transaction;
 import com.bank.repos.accounts.AccountRepository;
-import com.bank.exceptions.DomainException;
+import com.bank.exceptions.BusinessException;
 import org.modelmapper.ModelMapper;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.scheduling.annotation.Async;
@@ -51,7 +51,7 @@ public class TransactionService {
     public TransactionDto loadTransactionByTraceNo(String traceNo) {
         var transaction = _transactionRepository.findByTraceNo(traceNo).orElse(null);
         if(transaction == null)
-            throw new DomainException("error.transaction.notFound");
+            throw new BusinessException("error.transaction.notFound");
 
         return mapToTransactionDto(transaction);
     }
@@ -89,20 +89,20 @@ public class TransactionService {
     public void doTransaction(TransactionDto transactionDto) {
         var account = _accountRepository.findById(transactionDto.getAccountId()).orElse(null);
         if(account == null)
-            throw new DomainException("error.account.notFound");
+            throw new BusinessException("error.account.notFound");
 
         if(account.getCurrency() != transactionDto.getCurrency())
-            throw new DomainException("error.transaction.currency.mismatch");
+            throw new BusinessException("error.transaction.currency.mismatch");
 
         if(transactionDto.getTransactionType() == TransactionTypes.CREDIT) {
             account.setBalance(account.getBalance().add(transactionDto.getAmount()));
         } else if (transactionDto.getTransactionType() == TransactionTypes.DEBIT) {
             if(account.getBalance().compareTo(transactionDto.getAmount()) < 0)
-                throw new DomainException("error.transaction.balance.notEnough");
+                throw new BusinessException("error.transaction.balance.notEnough");
 
             account.setBalance(account.getBalance().subtract(transactionDto.getAmount()));
         } else
-            throw new DomainException("error.transaction.transactionType.invalid");
+            throw new BusinessException("error.transaction.transactionType.invalid");
 
         var transaction = _modelMapper.map(transactionDto, Transaction.class);
         transaction.setRegDate(LocalDateTime.now());

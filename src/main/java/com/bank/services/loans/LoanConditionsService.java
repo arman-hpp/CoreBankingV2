@@ -3,7 +3,7 @@ package com.bank.services.loans;
 import com.bank.enums.accounts.Currencies;
 import com.bank.repos.loans.LoanConditionsRepository;
 import com.bank.dtos.loans.LoanConditionsDto;
-import com.bank.exceptions.DomainException;
+import com.bank.exceptions.BusinessException;
 import com.bank.models.loans.LoanCondition;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
@@ -24,12 +24,12 @@ public class LoanConditionsService {
 
     public LoanConditionsDto loadLoanCondition(Currencies currency) {
         if(currency == null)
-            throw new DomainException("error.loan.conditions.currency.invalid");
+            throw new BusinessException("error.loan.conditions.currency.invalid");
 
         var loanConditions = _loanConditionsRepository
                 .findTop1ByCurrencyAndExpireDateIsNullOrderByStartDateDesc(currency).orElse(null);
         if(loanConditions == null)
-            throw new DomainException("error.loan.conditions.notFound");
+            throw new BusinessException("error.loan.conditions.notFound");
 
         return _modelMapper.map(loanConditions, LoanConditionsDto.class);
     }
@@ -38,7 +38,7 @@ public class LoanConditionsService {
     public void editLoanConditions(LoanConditionsDto loanConditionsDto) {
         var currentLoanConfigs = _loanConditionsRepository.findById(loanConditionsDto.getId()).orElse(null);
         if(currentLoanConfigs == null)
-            throw new DomainException("error.loan.conditions.notFound");
+            throw new BusinessException("error.loan.conditions.notFound");
 
         currentLoanConfigs.setExpireDate(LocalDateTime.now());
 

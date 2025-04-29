@@ -1,6 +1,6 @@
 package com.bank.services.loans;
 
-import com.bank.exceptions.DomainException;
+import com.bank.exceptions.BusinessException;
 import com.bank.models.accounts.Account;
 import com.bank.repos.loans.InstallmentRepository;
 import com.bank.repos.loans.LoanRepository;
@@ -69,7 +69,7 @@ public class LoanService {
     public List<LoanDto> loadLoansByCustomerId(Long customerId) {
         var customerDto = _customerService.loadCustomer(customerId);
         if(customerDto == null)
-            throw new DomainException("error.customer.notFound");
+            throw new BusinessException("error.customer.notFound");
 
         var loans = _loanRepository.findByCustomerIdOrderByRequestDate(customerId);
         var loanDtoList = new ArrayList<LoanDto>();
@@ -85,7 +85,7 @@ public class LoanService {
     public List<LoanDto> loadLoansByAccountId(Long accountId) {
         var accountDto = _accountService.loadAccount(accountId);
         if(accountDto == null)
-            throw new DomainException("error.account.notFound");
+            throw new BusinessException("error.account.notFound");
 
         var loans = _loanRepository.findByAccountIdOrderByRequestDate(accountId);
         var loanDtoList = new ArrayList<LoanDto>();
@@ -101,7 +101,7 @@ public class LoanService {
     public LoanDto loadLoan(Long loanId) {
         var loan = _loanRepository.findLoanByIdWithDetails(loanId).orElse(null);
         if (loan == null)
-            throw new DomainException("error.loan.noFound");
+            throw new BusinessException("error.loan.noFound");
 
         var loanDto = _modelMapper.map(loan, LoanDto.class);
         var account = loan.getAccount();
@@ -123,7 +123,7 @@ public class LoanService {
 
         var bankAccount = _accountService.loadBankAccount(loan.getCurrency());
         if (bankAccount.getBalance().compareTo(loan.getAmount()) < 0)
-            throw new DomainException("error.loan.deposit.bankAccount.balance.notEnough");
+            throw new BusinessException("error.loan.deposit.bankAccount.balance.notEnough");
 
         loan.setCustomer(new Customer(loanDto.getCustomerId()));
         loan.setAccount(new Account(loanDto.getAccountId()));
@@ -140,10 +140,10 @@ public class LoanService {
 
         var loan = _loanRepository.findById(loanDto.getId()).orElse(null);
         if (loan == null)
-            throw new DomainException("error.loan.noFound");
+            throw new BusinessException("error.loan.noFound");
 
         if (loan.getPaid())
-            throw new DomainException("error.loan.update.paidLoan");
+            throw new BusinessException("error.loan.update.paidLoan");
 
         loan.setRefundDuration(loanDto.getRefundDuration());
         loan.setAmount(loanDto.getAmount());
@@ -164,10 +164,10 @@ public class LoanService {
     public void removeLoan(Long loanId) {
         var loan = _loanRepository.findById(loanId).orElse(null);
         if (loan == null)
-            throw new DomainException("error.loan.noFound");
+            throw new BusinessException("error.loan.noFound");
 
         if (loan.getPaid())
-            throw new DomainException("error.loan.remove.paidLoan");
+            throw new BusinessException("error.loan.remove.paidLoan");
 
         _loanRepository.delete(loan);
     }

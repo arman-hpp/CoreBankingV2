@@ -3,7 +3,7 @@ package com.bank.services.loans;
 import com.bank.dtos.loans.PayInstallmentInputDto;
 import com.bank.dtos.loans.SumNonPaidInstallmentOutputDto;
 import com.bank.dtos.transactions.TransferDto;
-import com.bank.exceptions.DomainException;
+import com.bank.exceptions.BusinessException;
 import com.bank.models.loans.Installment;
 import com.bank.repos.loans.InstallmentRepository;
 import com.bank.services.transactions.TransactionService;
@@ -30,13 +30,13 @@ public class PayInstallmentService {
 
     public SumNonPaidInstallmentOutputDto sumNonPaidInstallment(Long loanId, Integer payInstallmentCount) {
         if (payInstallmentCount <= 0)
-            throw new DomainException("error.loan.installments.count.invalid");
+            throw new BusinessException("error.loan.installments.count.invalid");
 
         var installments = _installmentRepository
                 .findTopCountByLoanIdAndPaidOrderByInstallmentNo(payInstallmentCount, loanId, false);
 
         if(payInstallmentCount > installments.size())
-            throw new DomainException("error.loan.installments.count.excess");
+            throw new BusinessException("error.loan.installments.count.excess");
 
         var sumNonPaidInstallments = installments.stream()
                 .map(Installment::getPaymentAmount)
@@ -48,7 +48,7 @@ public class PayInstallmentService {
     @Transactional
     public void payInstallments(Long userId, PayInstallmentInputDto payInstallmentInputDto) {
         if(payInstallmentInputDto.getInstallmentCount() <= 0)
-            throw new DomainException("error.loan.installments.count.invalid");
+            throw new BusinessException("error.loan.installments.count.invalid");
 
         var installments = _installmentRepository
                 .findTopCountByLoanIdAndPaidOrderByInstallmentNo(
@@ -57,7 +57,7 @@ public class PayInstallmentService {
                         false);
 
         if(payInstallmentInputDto.getInstallmentCount() > installments.size())
-            throw new DomainException("error.loan.installments.count.excess");
+            throw new BusinessException("error.loan.installments.count.excess");
 
         var sumInstallmentsAmount = installments.stream()
                 .map(Installment::getPaymentAmount)

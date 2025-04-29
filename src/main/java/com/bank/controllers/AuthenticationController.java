@@ -1,7 +1,7 @@
 package com.bank.controllers;
 
 import com.bank.dtos.users.*;
-import com.bank.exceptions.DomainException;
+import com.bank.exceptions.BusinessException;
 import com.bank.services.users.AuthenticationService;
 import com.bank.services.users.CaptchaService;
 import com.bank.services.users.RefreshTokenCookieService;
@@ -41,7 +41,7 @@ public class AuthenticationController {
     @PostMapping("/login")
     public AccessTokenDto login(HttpServletResponse response, @RequestBody UserLoginInputDto input) {
         if(!_captchaService.verifyCaptcha(input.getCaptchaToken(), input.getCaptchaAnswer())){
-            throw new DomainException("error.auth.captcha.invalid");
+            throw new BusinessException("error.auth.captcha.invalid");
         }
 
         var userLoginDto = _authenticationService.authenticate(input);
@@ -58,7 +58,7 @@ public class AuthenticationController {
     public void changeUserPassword(@RequestBody UserChangePasswordInputDto input) {
         var userId = _authenticationService.loadCurrentUserId().orElse(null);
         if (userId == null) {
-            throw new DomainException("error.auth.credentials.invalid");
+            throw new BusinessException("error.auth.credentials.invalid");
         }
 
         input.setId(userId);

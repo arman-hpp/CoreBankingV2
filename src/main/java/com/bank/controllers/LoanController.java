@@ -2,7 +2,7 @@ package com.bank.controllers;
 
 import com.bank.dtos.loans.*;
 import com.bank.enums.accounts.Currencies;
-import com.bank.exceptions.DomainException;
+import com.bank.exceptions.BusinessException;
 import com.bank.services.loans.*;
 import com.bank.services.users.AuthenticationService;
 import org.springframework.web.bind.annotation.*;
@@ -89,7 +89,7 @@ public class LoanController {
     public void depositLoan(@RequestBody DepositLoanInputDto depositLoanInputDto) {
         var currentUserId = _authenticationService.loadCurrentUserId().orElse(null);
         if (currentUserId == null) {
-            throw new DomainException("error.auth.credentials.invalid");
+            throw new BusinessException("error.auth.credentials.invalid");
         }
 
         _depositLoanService.depositLoan(currentUserId, depositLoanInputDto);
@@ -99,7 +99,7 @@ public class LoanController {
     public void payInstallments(@RequestBody PayInstallmentInputDto payInstallmentInputDto) {
         var currentUserId = _authenticationService.loadCurrentUserId().orElse(null);
         if (currentUserId == null) {
-            throw new DomainException("error.auth.credentials.invalid");
+            throw new BusinessException("error.auth.credentials.invalid");
         }
 
         _payInstallmentService.payInstallments(currentUserId, payInstallmentInputDto);
@@ -113,7 +113,7 @@ public class LoanController {
         try {
             return future.get();
         } catch (ExecutionException | InterruptedException ex) {
-            throw new DomainException("error.public.unexpected");
+            throw new BusinessException("error.public.unexpected");
         }
     }
 }

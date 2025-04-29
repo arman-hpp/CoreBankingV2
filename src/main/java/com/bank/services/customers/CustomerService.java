@@ -3,7 +3,7 @@ package com.bank.services.customers;
 import com.bank.dtos.PagedResponseDto;
 import com.bank.dtos.filters.FilterInfoDto;
 import com.bank.dtos.customers.CustomerDto;
-import com.bank.exceptions.DomainException;
+import com.bank.exceptions.BusinessException;
 import com.bank.models.filters.BaseFilter;
 import com.bank.models.filters.FilterSpecification;
 import com.bank.models.customers.Customer;
@@ -40,7 +40,7 @@ public class CustomerService {
     public CustomerDto loadCustomer(Long customerId) {
         var customer = _customerRepository.findById(customerId).orElse(null);
         if (customer == null)
-            throw new DomainException("error.customer.notFound");
+            throw new BusinessException("error.customer.notFound");
 
         return _modelMapper.map(customer, CustomerDto.class);
     }
@@ -69,7 +69,7 @@ public class CustomerService {
     private CustomerDto editCustomer(CustomerDto customerDto) {
         var customer = _customerRepository.findById(customerDto.getId()).orElse(null);
         if (customer == null)
-            throw new DomainException("error.customer.notFound");
+            throw new BusinessException("error.customer.notFound");
 
         _modelMapper.map(customerDto, customer);
         _customerRepository.save(customer);
@@ -84,13 +84,13 @@ public class CustomerService {
     public void removeCustomer(Long customerId) {
         var customer = _customerRepository.findById(customerId).orElse(null);
         if (customer == null)
-            throw new DomainException("error.customer.notFound");
+            throw new BusinessException("error.customer.notFound");
 
         try {
             _customerRepository.delete(customer);
         }
         catch (DataIntegrityViolationException ex) {
-            throw new DomainException("error.public.dependent.entity");
+            throw new BusinessException("error.public.dependent.entity");
         }
     }
 

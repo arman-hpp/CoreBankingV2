@@ -3,7 +3,7 @@ package com.bank.services.loans;
 import com.bank.dtos.loans.DepositLoanInputDto;
 import com.bank.dtos.loans.LoanDto;
 import com.bank.dtos.transactions.TransferDto;
-import com.bank.exceptions.DomainException;
+import com.bank.exceptions.BusinessException;
 import com.bank.models.loans.Installment;
 import com.bank.repos.loans.InstallmentRepository;
 import com.bank.repos.loans.LoanRepository;
@@ -52,14 +52,14 @@ public class DepositLoanService {
     public void depositLoan(Long userId, DepositLoanInputDto depositLoanInputDto) {
         var loan = _loanRepository.findById(depositLoanInputDto.getLoanId()).orElse(null);
         if (loan == null)
-            throw new DomainException("error.loan.noFound");
+            throw new BusinessException("error.loan.noFound");
 
         if (loan.getDepositDate() != null)
-            throw new DomainException("error.loan.deposit.duplicate");
+            throw new BusinessException("error.loan.deposit.duplicate");
 
         var bankAccount = _accountService.loadBankAccount(loan.getCurrency());
         if (bankAccount.getBalance().compareTo(loan.getAmount()) < 0)
-            throw new DomainException("error.loan.deposit.bankAccount.balance.notEnough");
+            throw new BusinessException("error.loan.deposit.bankAccount.balance.notEnough");
 
         loan.setPaid(true);
         loan.setFirstPaymentDate(LocalDate.now().plusMonths(1));

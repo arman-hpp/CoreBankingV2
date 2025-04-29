@@ -4,7 +4,7 @@ import com.bank.dtos.PagedResponseDto;
 import com.bank.dtos.accounts.AccountDto;
 import com.bank.enums.accounts.AccountTypes;
 import com.bank.enums.accounts.Currencies;
-import com.bank.exceptions.DomainException;
+import com.bank.exceptions.BusinessException;
 import com.bank.models.accounts.Account;
 import com.bank.models.customers.Customer;
 import com.bank.repos.accounts.AccountRepository;
@@ -47,7 +47,7 @@ public class AccountService {
     public AccountDto loadAccount(Long accountId) {
         var account = _accountRepository.findFromAllAccountWithDetails(accountId).orElse(null);
         if(account == null)
-            throw new DomainException("error.account.notFound");
+            throw new BusinessException("error.account.notFound");
 
         var accountDto = _modelMapper.map(account, AccountDto.class);
 
@@ -63,7 +63,7 @@ public class AccountService {
     public AccountDto loadCustomerAccount(Long accountId) {
         var account = _accountRepository.findAccountWithDetails(accountId).orElse(null);
         if(account == null)
-            throw new DomainException("error.account.notFound");
+            throw new BusinessException("error.account.notFound");
 
         var accountDto = _modelMapper.map(account, AccountDto.class);
 
@@ -77,7 +77,7 @@ public class AccountService {
     public PagedResponseDto<AccountDto> loadCustomerAccounts(Long customerId, int page, int size) {
         var customer = _customerRepository.findById(customerId).orElse(null);
         if(customer == null)
-            throw new DomainException("error.customer.notFound");
+            throw new BusinessException("error.customer.notFound");
 
         var pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "Id"));
         var accounts = _accountRepository.findByCustomerIdOrderByIdDesc(customerId, pageable);
@@ -89,7 +89,7 @@ public class AccountService {
     public AccountDto loadBankAccount(Currencies currency) {
         var account = _accountRepository.findByAccountTypeAndCurrency(AccountTypes.BANK_ACCOUNT, currency).orElse(null);
         if(account == null)
-            throw new DomainException("error.account.notFound");
+            throw new BusinessException("error.account.notFound");
 
         return _modelMapper.map(account, AccountDto.class);
     }
@@ -103,7 +103,7 @@ public class AccountService {
 
     public AccountDto addAccount(AccountDto accountDto) {
         if(accountDto.getCustomerId() == null) {
-            throw new DomainException("error.account.notCustomerFound");
+            throw new BusinessException("error.account.notCustomerFound");
         }
 
         var account = _modelMapper.map(accountDto, Account.class);

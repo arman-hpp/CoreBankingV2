@@ -1,6 +1,6 @@
 package com.bank.services.users;
 
-import com.bank.exceptions.DomainException;
+import com.bank.exceptions.BusinessException;
 import com.bank.utils.utils.JwtUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -174,7 +174,7 @@ public class CaptchaService {
             ImageIO.write(image, "png", outputStream);
             return BASE64_ENCODER.encodeToString(outputStream.toByteArray());
         } catch (IOException e) {
-            throw new DomainException("error.auth.captcha.error");
+            throw new BusinessException("error.auth.captcha.error");
         }
     }
 

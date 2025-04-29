@@ -3,7 +3,7 @@ package com.bank.services.users;
 import com.bank.dtos.users.*;
 import com.bank.enums.users.UserState;
 import com.bank.enums.users.UserTypes;
-import com.bank.exceptions.DomainException;
+import com.bank.exceptions.BusinessException;
 import com.bank.models.users.User;
 import com.bank.repos.users.UserRepository;
 import org.modelmapper.ModelMapper;
@@ -217,18 +217,18 @@ public class AuthenticationService  {
     public void login(UserLoginInputDto userLoginInputDto) {
         var user = _userRepository.findByUsername(userLoginInputDto.getUsername()).orElse(null);
         if(user == null)
-            throw new DomainException("error.auth.notFound");
+            throw new BusinessException("error.auth.notFound");
 
         if (!Objects.equals(user.getPassword(), userLoginInputDto.getPassword()))
-            throw new DomainException("error.auth.credentials.invalid");
+            throw new BusinessException("error.auth.credentials.invalid");
     }
 
     public UserDto register(UserRegisterInputDto userRegisterInputDto) {
         if(_userRepository.findByUsername(userRegisterInputDto.getUsername()).orElse(null) != null)
-            throw new DomainException("error.auth.username.duplicate");
+            throw new BusinessException("error.auth.username.duplicate");
 
         if(!userRegisterInputDto.getPassword().equals(userRegisterInputDto.getRepeatPassword()))
-            throw new DomainException("error.auth.password.mismatch");
+            throw new BusinessException("error.auth.password.mismatch");
 
         var user = _modelMapper.map(userRegisterInputDto, User.class);
         user.setUserType(UserTypes.ROLE_USER);
@@ -244,17 +244,17 @@ public class AuthenticationService  {
 
     public void changePassword(UserChangePasswordInputDto userChangePasswordInputDto) {
         if(!Objects.equals(userChangePasswordInputDto.getNewPassword(), userChangePasswordInputDto.getRepeatNewPassword()))
-            throw new DomainException("error.auth.password.mismatch");
+            throw new BusinessException("error.auth.password.mismatch");
 
         if(Objects.equals(userChangePasswordInputDto.getOldPassword(), userChangePasswordInputDto.getNewPassword()))
-            throw new DomainException("error.auth.password.samePassword");
+            throw new BusinessException("error.auth.password.samePassword");
 
         var user = _userRepository.findById(userChangePasswordInputDto.getId()).orElse(null);
         if(user == null)
-            throw new DomainException("error.auth.notFound");
+            throw new BusinessException("error.auth.notFound");
 
         if (!_passwordEncoder.matches(userChangePasswordInputDto.getOldPassword(), user.getPassword()))
-            throw new DomainException("error.auth.credentials.invalid");
+            throw new BusinessException("error.auth.credentials.invalid");
 
         user.setPassword(_passwordEncoder.encode(userChangePasswordInputDto.getNewPassword()));
         user.setLastPasswordChangedDate(LocalDateTime.now());

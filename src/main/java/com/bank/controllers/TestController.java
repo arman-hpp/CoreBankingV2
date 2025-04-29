@@ -13,7 +13,7 @@ public class TestController {
     }
 
     @GetMapping("/echo")
-    public String sayHello(String text) {
-        return text;
+    public String echo(String text) {
+      return text;
     }
 }
