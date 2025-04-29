@@ -33,27 +33,30 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ApiErrorResponse> handleValidationException(MethodArgumentNotValidException ex) {
+    public ResponseEntity<ApiErrorResponse> handleValidationException(MethodArgumentNotValidException ex, Locale locale) {
         logger.warn("Validation error occurred: {}", ex.getMessage(), ex);
         var errors = ex.getBindingResult()
                 .getFieldErrors()
                 .stream()
                 .map(fieldError -> fieldError.getField() + ": " + fieldError.getDefaultMessage())
                 .collect(Collectors.toList());
-
-        return buildResponse("Validation Error", String.join(", ", errors), HttpStatus.BAD_REQUEST);
+        var joinedErrors = String.join(", ", errors);
+        var message = messageSource.getMessage("error.public.http.argument.validation", new Object[]{joinedErrors}, locale);
+        return buildResponse("Validation Error", message, HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(AccessDeniedException.class)
-    public ResponseEntity<ApiErrorResponse> handleAccessDeniedException(AccessDeniedException ex) {
+    public ResponseEntity<ApiErrorResponse> handleAccessDeniedException(AccessDeniedException ex, Locale locale) {
         logger.error("Access denied exception caught", ex);
-        return buildResponse("Forbidden", "You don't have permission to access this resource.", HttpStatus.FORBIDDEN);
+        var message = messageSource.getMessage("error.public.http.access.denied", null, locale);
+        return buildResponse("Forbidden", message, HttpStatus.FORBIDDEN);
     }
 
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<ApiErrorResponse> handleGeneralException(Exception ex) {
+    public ResponseEntity<ApiErrorResponse> handleGeneralException(Exception ex, Locale locale) {
         logger.error("Unhandled exception caught", ex);
-        return buildResponse("Internal Server Error", "An unexpected error occurred.", HttpStatus.INTERNAL_SERVER_ERROR);
+        var message = messageSource.getMessage("error.public.http.unexpected", null, locale);
+        return buildResponse("Internal Server Error", message, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
     private ResponseEntity<ApiErrorResponse> buildResponse(String error, String message, HttpStatus status) {
