@@ -32,6 +32,7 @@ build/
 ### VS Code ###
 .vscode/
 
-### H2 Database files ###
-BankDb.lock.db
-BankDb.trace.db
+### H2 Database ###
+*.trace.db
+*.lock.db
+*.h2.db
