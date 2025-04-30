@@ -29,5 +29,5 @@ public class Ledger extends BaseEntity {
     private Boolean isActive;
 
     @OneToMany(mappedBy = "ledger", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
-    private Set<GroupLedger> groupLedgers = new HashSet<>();
+    private Set<GeneralLedger> generalLedgers = new HashSet<>();
 }

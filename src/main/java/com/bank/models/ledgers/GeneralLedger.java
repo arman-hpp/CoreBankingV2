@@ -16,7 +16,6 @@ import java.util.Set;
 @NoArgsConstructor
 @Entity
 @Table(name = "General_Ledgers")
-@SuppressWarnings("JpaDataSourceORMInspection")
 public class GeneralLedger extends BaseEntity {
     @Column(name = "code", length = 20, nullable = false, unique = true)
     private String code;
@@ -39,8 +38,8 @@ public class GeneralLedger extends BaseEntity {
     private LedgerNatures ledgerNature;
 
     @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "group_ledger_id")
-    private GroupLedger groupLedger;
+    @JoinColumn(name = "ledger_id")
+    private Ledger ledger;
 
     @OneToMany(mappedBy = "generalLedger", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     private Set<SubLedger> subLedgers = new HashSet<>();
