@@ -5,6 +5,7 @@ import com.bank.configs.filters.RateLimitingFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -22,7 +23,8 @@ public class WebSecurityConfiguration {
     public final JwtAuthenticationFilter _jwtAuthenticationFilter;
     public final RateLimitingFilter _rateLimitingFilter;
 
-    public WebSecurityConfiguration(JwtAuthenticationFilter jwtAuthenticationFilter, RateLimitingFilter rateLimitingFilter) {
+    public WebSecurityConfiguration(JwtAuthenticationFilter jwtAuthenticationFilter,
+                                    RateLimitingFilter rateLimitingFilter) {
         _jwtAuthenticationFilter = jwtAuthenticationFilter;
         _rateLimitingFilter = rateLimitingFilter;
     }
@@ -30,6 +32,7 @@ public class WebSecurityConfiguration {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
+                .cors(Customizer.withDefaults())
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests((requests) -> requests
                         .requestMatchers("/h2/**").permitAll()
@@ -37,11 +40,12 @@ public class WebSecurityConfiguration {
                         .requestMatchers(HttpMethod.GET, "/api/auth/captcha").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/auth/login", "/api/auth/register", "/api/auth/refresh_token").permitAll()
                         .requestMatchers("/error/**").permitAll()
+                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .anyRequest().authenticated()
                 );
 
         http.addFilterBefore(_rateLimitingFilter, UsernamePasswordAuthenticationFilter.class);
-        http.addFilterBefore(_jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+        http.addFilterAfter(_jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
 
@@ -51,7 +55,7 @@ public class WebSecurityConfiguration {
         configuration.setAllowedOrigins(List.of("http://localhost:8090", "http://127.0.0.1:8090"));
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("Authorization","Content-Type"));
-
+        configuration.setAllowCredentials(true);
         var source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**",configuration);
 
