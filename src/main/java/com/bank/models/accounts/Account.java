@@ -2,6 +2,7 @@ package com.bank.models.accounts;
 
 import com.bank.enums.accounts.AccountTypes;
 import com.bank.enums.accounts.Currencies;
+import com.bank.models.ledgers.SubLedger;
 import com.bank.models.transactions.Transaction;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -19,7 +20,6 @@ import java.util.Set;
 @NoArgsConstructor
 @Entity
 @Table(name = "Accounts")
-@SuppressWarnings("JpaDataSourceORMInspection")
 public class Account extends BaseEntity {
     @Column(name = "balance", nullable = false, precision = 15, scale = 2)
     private BigDecimal balance;
@@ -31,6 +31,10 @@ public class Account extends BaseEntity {
     @Column(name = "account_type", nullable = false)
     @Enumerated(EnumType.ORDINAL)
     private AccountTypes accountType;
+
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "sub_ledger_id")
+    private SubLedger subLedger;
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "customer_id")
