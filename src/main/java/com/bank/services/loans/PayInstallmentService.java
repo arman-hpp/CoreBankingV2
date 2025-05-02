@@ -74,8 +74,8 @@ public class PayInstallmentService {
         var transferDto = new TransferDto(sumInstallmentsAmount,
                 "Pay " + payInstallmentInputDto.getInstallmentCount() +
                         " installment(s) for loan Id " + payInstallmentInputDto.getLoanId(),
-                "Deposit for loan's installment(s) from account Id " + payInstallmentInputDto.getAccountId() + " and loan Id " + payInstallmentInputDto.getLoanId(),
-                payInstallmentInputDto.getAccountId(), loanAccountId, userId, currency);
+                "Deposit for loan's installment(s) from account Id " + payInstallmentInputDto.getCustomerAccountId() + " and loan Id " + payInstallmentInputDto.getLoanId(),
+                payInstallmentInputDto.getCustomerAccountId(), loanAccountId, userId, currency);
 
         _transactionService.transfer(transferDto);
     }

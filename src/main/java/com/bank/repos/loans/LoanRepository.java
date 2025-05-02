@@ -10,10 +10,13 @@ import java.util.Optional;
 
 @Repository
 public interface LoanRepository extends BaseRepository<Loan, Long> {
-    @Query(value = "SELECT l FROM Loan l JOIN FETCH l.account a JOIN FETCH l.customer ORDER BY l.id DESC")
+    @Query(value = "SELECT l FROM Loan l JOIN FETCH l.customerAccount a JOIN FETCH l.customer ORDER BY l.id DESC")
     List<Loan> findLoanWithDetails();
-    @Query(value = "SELECT l FROM Loan l JOIN FETCH l.account a JOIN FETCH l.customer WHERE l.id = ?1 ORDER BY l.id DESC")
+
+    @Query(value = "SELECT l FROM Loan l JOIN FETCH l.customerAccount a JOIN FETCH l.customer WHERE l.id = ?1 ORDER BY l.id DESC")
     Optional<Loan> findLoanByIdWithDetails(Long id);
+
     List<Loan> findByCustomerIdOrderByRequestDate(Long customerId);
-    List<Loan> findByAccountIdOrderByRequestDate(Long accountId);
+
+    List<Loan> findByCustomerAccountIdOrderByRequestDate(Long accountId);
 }

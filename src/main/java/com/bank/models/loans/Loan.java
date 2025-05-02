@@ -18,7 +18,6 @@ import java.util.Set;
 @Setter
 @Entity
 @Table(name = "Loans")
-@SuppressWarnings("JpaDataSourceORMInspection")
 public class Loan extends BaseEntity {
     @Column(name = "amount", nullable = false, precision = 15, scale = 2)
     private BigDecimal amount;
@@ -50,8 +49,8 @@ public class Loan extends BaseEntity {
     private Customer customer;
 
     @ManyToOne(fetch = FetchType.EAGER, optional = false)
-    @JoinColumn(name = "account_id", nullable = false)
-    private Account account; // TODO: rename account -> customerAccount
+    @JoinColumn(name = "customer_account_id", nullable = false)
+    private Account customerAccount;
 
     @ManyToOne(fetch = FetchType.EAGER, optional = false)
     @JoinColumn(name = "loan_account_id", nullable = false)

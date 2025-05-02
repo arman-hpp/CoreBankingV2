@@ -53,7 +53,7 @@ public class LoanService {
         var loanDtoList = new ArrayList<LoanDto>();
         for (var loan : loans) {
             var loanDto = _modelMapper.map(loan, LoanDto.class);
-            var account = loan.getAccount();
+            var account = loan.getCustomerAccount();
             var customer = loan.getCustomer();
 
             loanDto.setAccountId(account.getId());
@@ -77,7 +77,7 @@ public class LoanService {
         var loanDtoList = new ArrayList<LoanDto>();
         for (var loan : loans) {
             var loanDto = _modelMapper.map(loan, LoanDto.class);
-            loanDto.setAccountId(loan.getAccount().getId());
+            loanDto.setAccountId(loan.getCustomerAccount().getId());
             loanDtoList.add(loanDto);
         }
 
@@ -89,7 +89,7 @@ public class LoanService {
         if(accountDto == null)
             throw new BusinessException("error.account.notFound");
 
-        var loans = _loanRepository.findByAccountIdOrderByRequestDate(accountId);
+        var loans = _loanRepository.findByCustomerAccountIdOrderByRequestDate(accountId);
         var loanDtoList = new ArrayList<LoanDto>();
         for (var loan : loans) {
             var loanDto = _modelMapper.map(loan, LoanDto.class);
@@ -106,7 +106,7 @@ public class LoanService {
             throw new BusinessException("error.loan.noFound");
 
         var loanDto = _modelMapper.map(loan, LoanDto.class);
-        var account = loan.getAccount();
+        var account = loan.getCustomerAccount();
         var customer = loan.getCustomer();
         loanDto.setAccountId(account.getId());
         loanDto.setAccountBalance(account.getBalance());
@@ -128,7 +128,7 @@ public class LoanService {
 //            throw new BusinessException("error.loan.deposit.bankAccount.balance.notEnough");
 
         loan.setCustomer(new Customer(loanDto.getCustomerId()));
-        loan.setAccount(new Account(loanDto.getAccountId()));
+        loan.setCustomerAccount(new Account(loanDto.getAccountId()));
         loan.setRequestDate(LocalDateTime.now());
         loan.setInterestRate(loanConditionsDto.getInterestRate());
         loan.setPaid(false);
@@ -150,7 +150,7 @@ public class LoanService {
         loan.setRefundDuration(loanDto.getRefundDuration());
         loan.setAmount(loanDto.getAmount());
         loan.setCustomer(new Customer(loanDto.getCustomerId()));
-        loan.setAccount(new Account(loanDto.getAccountId()));
+        loan.setCustomerAccount(new Account(loanDto.getAccountId()));
 
         var accountDto = new AccountDto();
         accountDto.setCurrency(loanDto.getCurrency());

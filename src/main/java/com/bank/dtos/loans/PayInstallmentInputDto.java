@@ -15,7 +15,7 @@ import java.math.BigDecimal;
 @Setter
 public class PayInstallmentInputDto extends BaseDto {
     private Long loanId;
-    private Long accountId; //TODO: rename accountId to customerAccountId
+    private Long customerAccountId;
     private Long loanAccountId;
     private Integer InstallmentCount;
     private BigDecimal Amount;

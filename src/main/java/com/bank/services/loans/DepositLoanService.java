@@ -7,7 +7,6 @@ import com.bank.exceptions.BusinessException;
 import com.bank.models.loans.Installment;
 import com.bank.repos.loans.InstallmentRepository;
 import com.bank.repos.loans.LoanRepository;
-import com.bank.services.accounts.AccountService;
 import com.bank.services.loans.interfaces.ILoanCalculator;
 import com.bank.services.loans.interfaces.ILoanValidator;
 import com.bank.services.transactions.TransactionService;
@@ -26,7 +25,6 @@ public class DepositLoanService {
     private final ILoanValidator _loanValidator;
     private final LoanConditionsService _loanConditionsService;
     private final TransactionService _transactionService;
-    private final AccountService _accountService;
     private final ILoanCalculator _loanCalculator;
     private final ModelMapper _modelMapper;
 
@@ -35,7 +33,6 @@ public class DepositLoanService {
                               ILoanValidator loanValidator,
                               LoanConditionsService loanConditionsService,
                               TransactionService transactionService,
-                              AccountService accountService,
                               ILoanCalculator loanCalculator,
                               ModelMapper modelMapper) {
         _loanRepository = loanRepository;
@@ -43,7 +40,6 @@ public class DepositLoanService {
         _loanValidator = loanValidator;
         _loanConditionsService = loanConditionsService;
         _transactionService = transactionService;
-        _accountService = accountService;
         _loanCalculator = loanCalculator;
         _modelMapper = modelMapper;
     }
@@ -86,7 +82,7 @@ public class DepositLoanService {
         _loanRepository.save(loan);
 
         var loanAccountId = loan.getLoanAccount().getId();
-        var customerAccountId = loan.getAccount().getId();
+        var customerAccountId = loan.getCustomerAccount().getId();
 
         var transferDto = new TransferDto(loan.getAmount(),
                 "Debit for loan to customer account " + customerAccountId,
