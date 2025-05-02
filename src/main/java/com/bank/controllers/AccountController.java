@@ -29,21 +29,33 @@ public class AccountController {
         return _accountService.loadCustomerAccounts(customerId, page, size);
     }
 
-    @GetMapping("/banks")
-    public PagedResponseDto<AccountDto> getAllBankAccounts(
+    @GetMapping("/by/subLedger")
+    public PagedResponseDto<AccountDto> getAccountsBySubLedger(
+            @RequestParam Long subLedgerId,
             @RequestParam(defaultValue = "0") Integer page,
             @RequestParam(defaultValue = "10") Integer size) {
-        return _accountService.loadBankAccounts(page, size);
+        return _accountService.loadAccountsBySubLedgerId(subLedgerId, page, size);
+    }
+
+    @GetMapping("/by/generalLedger")
+    public PagedResponseDto<AccountDto> getAccountsByGeneralLedger(
+            @RequestParam Long generalLedgerId,
+            @RequestParam(defaultValue = "0") Integer page,
+            @RequestParam(defaultValue = "10") Integer size) {
+        return _accountService.loadAccountsByGeneralLedgerId(generalLedgerId, page, size);
+    }
+
+    @GetMapping("/by/ledger")
+    public PagedResponseDto<AccountDto> getAccountsByLedger(
+            @RequestParam Long ledgerId,
+            @RequestParam(defaultValue = "0") Integer page,
+            @RequestParam(defaultValue = "10") Integer size) {
+        return _accountService.loadAccountsByLedgerId(ledgerId, page, size);
     }
 
     @GetMapping("/{id}")
     public AccountDto getAccountById(@PathVariable Long id) {
         return _accountService.loadAccount(id);
-    }
-
-    @GetMapping("/customerAccount/{id}")
-    public AccountDto getCustomerAccountById(@PathVariable Long id) {
-        return _accountService.loadCustomerAccount(id);
     }
 
     @PostMapping("/")

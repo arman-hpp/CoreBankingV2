@@ -34,4 +34,5 @@ public class LoanDto extends BaseDto {
     private String accountCustomerName;
     private BigDecimal accountBalance;
     private Currencies accountCurrency;
+    private Long subLedgerId;
 }

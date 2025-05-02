@@ -50,6 +50,7 @@ public class DepositLoanService {
 
     @Transactional
     public void depositLoan(Long userId, DepositLoanInputDto depositLoanInputDto) {
+        // TODO: get loan by customerAccount And loanAccount
         var loan = _loanRepository.findById(depositLoanInputDto.getLoanId()).orElse(null);
         if (loan == null)
             throw new BusinessException("error.loan.noFound");
@@ -57,9 +58,9 @@ public class DepositLoanService {
         if (loan.getDepositDate() != null)
             throw new BusinessException("error.loan.deposit.duplicate");
 
-        var bankAccount = _accountService.loadBankAccount(loan.getCurrency());
-        if (bankAccount.getBalance().compareTo(loan.getAmount()) < 0)
-            throw new BusinessException("error.loan.deposit.bankAccount.balance.notEnough");
+//        var bankAccount = _accountService.loadBankAccount(loan.getCurrency());
+//        if (bankAccount.getBalance().compareTo(loan.getAmount()) < 0)
+//            throw new BusinessException("error.loan.deposit.bankAccount.balance.notEnough");
 
         loan.setPaid(true);
         loan.setFirstPaymentDate(LocalDate.now().plusMonths(1));
@@ -84,13 +85,13 @@ public class DepositLoanService {
         _installmentRepository.saveAll(list);
         _loanRepository.save(loan);
 
-        var bankAccountId = bankAccount.getId();
+        var loanAccountId = loan.getLoanAccount().getId();
         var customerAccountId = loan.getAccount().getId();
 
         var transferDto = new TransferDto(loan.getAmount(),
                 "Debit for loan to customer account " + customerAccountId,
                 "Deposit loan Id " + depositLoanInputDto.getLoanId(),
-                bankAccountId, customerAccountId, userId, loan.getCurrency());
+                loanAccountId, customerAccountId, userId, loan.getCurrency());
 
         _transactionService.transfer(transferDto);
     }

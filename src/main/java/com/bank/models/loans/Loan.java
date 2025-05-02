@@ -51,7 +51,11 @@ public class Loan extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.EAGER, optional = false)
     @JoinColumn(name = "account_id", nullable = false)
-    private Account account;
+    private Account account; // TODO: rename account -> customerAccount
+
+    @ManyToOne(fetch = FetchType.EAGER, optional = false)
+    @JoinColumn(name = "loan_account_id", nullable = false)
+    private Account loanAccount;
 
     @OneToMany(mappedBy = "loan", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     private Set<Installment> installments = new HashSet<>();

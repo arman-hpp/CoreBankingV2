@@ -28,10 +28,6 @@ public class Account extends BaseEntity {
     @Enumerated(EnumType.ORDINAL)
     private Currencies currency;
 
-    @Column(name = "account_type", nullable = false)
-    @Enumerated(EnumType.ORDINAL)
-    private AccountTypes accountType;
-
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "sub_ledger_id")
     private SubLedger subLedger;
@@ -45,5 +41,14 @@ public class Account extends BaseEntity {
 
     public Account(Long Id) {
         setId(Id);
+    }
+
+    public AccountTypes getDerivedAccountType() {
+        var glTitle = this.subLedger.getGeneralLedger().getTitle();
+        if("Bank Accounts".equals(glTitle))
+            return AccountTypes.BANK_ACCOUNT;
+        if("Customer Deposits".equals(glTitle))
+            return AccountTypes.CUSTOMER_ACCOUNT;
+        return AccountTypes.UNKNOWN_ACCOUNT;
     }
 }

@@ -44,4 +44,8 @@ public class SubLedger extends BaseEntity {
 
     @OneToMany(mappedBy = "subLedger", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     private Set<Account> accounts = new HashSet<>();
+
+    public SubLedger(Long Id) {
+        setId(Id);
+    }
 }

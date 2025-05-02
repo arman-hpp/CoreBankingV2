@@ -13,15 +13,15 @@ public class ModelMapperConfiguration {
     @Bean
     public ModelMapper modelMapper() {
         var mapper = new ModelMapper();
-        mapper.getConfiguration()
-                .setMatchingStrategy(MatchingStrategies.STRICT);
+        mapper.getConfiguration().setMatchingStrategy(MatchingStrategies.STRICT);
+        mapper.getConfiguration().setPropertyCondition(new HibernateInitializedCondition<>());
         mapper.addMappings(new PropertyMap<User, UserDto>() {
             @Override
             protected void configure() {
                 skip(destination.getPassword());  // Ignore password field
             }
         });
-
         return mapper;
     }
 }
+

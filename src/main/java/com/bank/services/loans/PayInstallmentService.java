@@ -9,7 +9,6 @@ import com.bank.repos.loans.InstallmentRepository;
 import com.bank.services.transactions.TransactionService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import com.bank.services.accounts.AccountService;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -18,14 +17,11 @@ import java.time.LocalDateTime;
 public class PayInstallmentService {
     private final InstallmentRepository _installmentRepository;
     private final TransactionService _transactionService;
-    private final AccountService _accountService;
 
     public PayInstallmentService(InstallmentRepository installmentRepository,
-                                 TransactionService transactionService,
-                                 AccountService accountService) {
+                                 TransactionService transactionService) {
         _installmentRepository = installmentRepository;
         _transactionService = transactionService;
-        _accountService = accountService;
     }
 
     public SumNonPaidInstallmentOutputDto sumNonPaidInstallment(Long loanId, Integer payInstallmentCount) {
@@ -71,13 +67,15 @@ public class PayInstallmentService {
         _installmentRepository.saveAll(installments);
 
         var currency = installments.getFirst().getCurrency();
-        var bankAccountId = _accountService.loadBankAccount(currency).getId();
+
+        // TODO: it's better to load Loan to get loanAccountId
+        var loanAccountId = payInstallmentInputDto.getLoanAccountId();
 
         var transferDto = new TransferDto(sumInstallmentsAmount,
                 "Pay " + payInstallmentInputDto.getInstallmentCount() +
                         " installment(s) for loan Id " + payInstallmentInputDto.getLoanId(),
                 "Deposit for loan's installment(s) from account Id " + payInstallmentInputDto.getAccountId() + " and loan Id " + payInstallmentInputDto.getLoanId(),
-                payInstallmentInputDto.getAccountId(), bankAccountId, userId, currency);
+                payInstallmentInputDto.getAccountId(), loanAccountId, userId, currency);
 
         _transactionService.transfer(transferDto);
     }

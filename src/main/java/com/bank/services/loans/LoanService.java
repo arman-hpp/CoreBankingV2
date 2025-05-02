@@ -1,5 +1,6 @@
 package com.bank.services.loans;
 
+import com.bank.dtos.accounts.AccountDto;
 import com.bank.exceptions.BusinessException;
 import com.bank.models.accounts.Account;
 import com.bank.repos.loans.InstallmentRepository;
@@ -15,6 +16,7 @@ import com.bank.services.accounts.AccountService;
 import com.bank.services.customers.CustomerService;
 import com.bank.services.loans.interfaces.ILoanValidator;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -121,9 +123,9 @@ public class LoanService {
 
         var loan = _modelMapper.map(loanDto, Loan.class);
 
-        var bankAccount = _accountService.loadBankAccount(loan.getCurrency());
-        if (bankAccount.getBalance().compareTo(loan.getAmount()) < 0)
-            throw new BusinessException("error.loan.deposit.bankAccount.balance.notEnough");
+//        var bankAccount = _accountService.loadBankAccount(loan.getCurrency());
+//        if (bankAccount.getBalance().compareTo(loan.getAmount()) < 0)
+//            throw new BusinessException("error.loan.deposit.bankAccount.balance.notEnough");
 
         loan.setCustomer(new Customer(loanDto.getCustomerId()));
         loan.setAccount(new Account(loanDto.getAccountId()));
@@ -149,6 +151,16 @@ public class LoanService {
         loan.setAmount(loanDto.getAmount());
         loan.setCustomer(new Customer(loanDto.getCustomerId()));
         loan.setAccount(new Account(loanDto.getAccountId()));
+
+        var accountDto = new AccountDto();
+        accountDto.setCurrency(loanDto.getCurrency());
+        accountDto.setCustomerId(loanDto.getCustomerId());
+        accountDto.setBalance(BigDecimal.ZERO);
+        accountDto.setSubLedgerId(loanDto.getSubLedgerId());
+
+        var rAccount = _accountService.addAccount(accountDto);
+
+        loan.setLoanAccount(new Account(rAccount.getId()));
 
         _loanRepository.save(loan);
     }
