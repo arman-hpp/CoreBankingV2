@@ -19,4 +19,6 @@ public interface LoanRepository extends BaseRepository<Loan, Long> {
     List<Loan> findByCustomerIdOrderByRequestDate(Long customerId);
 
     List<Loan> findByCustomerAccountIdOrderByRequestDate(Long accountId);
+
+    Optional<Loan> findByLoanAccountId(Long accountId);
 }

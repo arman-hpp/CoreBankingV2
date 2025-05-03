@@ -12,7 +12,9 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
 
-// adapted from https://github.com/ArtyomPanfutov/loan-amortization-calculator
+/**
+ * adapted from <a href="https://github.com/ArtyomPanfutov/loan-amortization-calculator">...</a>
+ */
 public class AmortizationLoanCalculator implements ILoanCalculator {
     public LoanPaymentInfoDto calculate(LoanDto loanDto) {
         var overPaidInterestAmount = BigDecimal.ZERO;

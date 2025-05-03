@@ -85,6 +85,11 @@ public class LoanController {
         _loanService.addOrEditLoan(loanDto);
     }
 
+    @PostMapping("/delete")
+    public void deleteLoan(@RequestBody LoanDto loanDto) {
+        _loanService.removeLoan(loanDto.getId());
+    }
+
     @PostMapping({"/deposit"})
     public void depositLoan(@RequestBody DepositLoanInputDto depositLoanInputDto) {
         var currentUserId = _authenticationService.loadCurrentUserId().orElse(null);

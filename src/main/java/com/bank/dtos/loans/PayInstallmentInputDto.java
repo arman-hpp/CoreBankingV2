@@ -14,7 +14,6 @@ import java.math.BigDecimal;
 @Getter
 @Setter
 public class PayInstallmentInputDto extends BaseDto {
-    private Long loanId;
     private Long customerAccountId;
     private Long loanAccountId;
     private Integer InstallmentCount;

@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 import com.bank.services.accounts.AccountService;
 import com.bank.services.customers.CustomerService;
 import com.bank.services.loans.interfaces.ILoanValidator;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -117,21 +118,25 @@ public class LoanService {
         return loanDto;
     }
 
+
     public void addLoan(LoanDto loanDto) {
         var loanConditionsDto = _loanConditionsService.loadLoanCondition(loanDto.getCurrency());
         _loanValidator.validate(loanConditionsDto, loanDto);
 
+        var accountDto = new AccountDto();
+        accountDto.setCurrency(loanDto.getCurrency());
+        accountDto.setCustomerId(loanDto.getCustomerId());
+        accountDto.setBalance(BigDecimal.ZERO);
+        accountDto.setSubLedgerId(loanDto.getSubLedgerId());
+        var newAccountDto = _accountService.addAccount(accountDto);
+
         var loan = _modelMapper.map(loanDto, Loan.class);
-
-//        var bankAccount = _accountService.loadBankAccount(loan.getCurrency());
-//        if (bankAccount.getBalance().compareTo(loan.getAmount()) < 0)
-//            throw new BusinessException("error.loan.deposit.bankAccount.balance.notEnough");
-
         loan.setCustomer(new Customer(loanDto.getCustomerId()));
         loan.setCustomerAccount(new Account(loanDto.getAccountId()));
         loan.setRequestDate(LocalDateTime.now());
         loan.setInterestRate(loanConditionsDto.getInterestRate());
         loan.setPaid(false);
+        loan.setLoanAccount(new Account(newAccountDto.getId()));
 
         _loanRepository.save(loan);
     }
@@ -152,19 +157,10 @@ public class LoanService {
         loan.setCustomer(new Customer(loanDto.getCustomerId()));
         loan.setCustomerAccount(new Account(loanDto.getAccountId()));
 
-        var accountDto = new AccountDto();
-        accountDto.setCurrency(loanDto.getCurrency());
-        accountDto.setCustomerId(loanDto.getCustomerId());
-        accountDto.setBalance(BigDecimal.ZERO);
-        accountDto.setSubLedgerId(loanDto.getSubLedgerId());
-
-        var rAccount = _accountService.addAccount(accountDto);
-
-        loan.setLoanAccount(new Account(rAccount.getId()));
-
         _loanRepository.save(loan);
     }
 
+    @Transactional
     public void addOrEditLoan(LoanDto loanDto) {
         if (loanDto.getId() == null || loanDto.getId() <= 0) {
             addLoan(loanDto);

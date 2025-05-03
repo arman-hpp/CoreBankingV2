@@ -13,4 +13,3 @@ public enum Currencies {
         this.symbol = symbol;
     }
 }
-

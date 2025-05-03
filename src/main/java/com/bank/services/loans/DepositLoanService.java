@@ -51,12 +51,8 @@ public class DepositLoanService {
         if (loan == null)
             throw new BusinessException("error.loan.noFound");
 
-        if (loan.getDepositDate() != null)
+        if (loan.getPaid())
             throw new BusinessException("error.loan.deposit.duplicate");
-
-//        var bankAccount = _accountService.loadBankAccount(loan.getCurrency());
-//        if (bankAccount.getBalance().compareTo(loan.getAmount()) < 0)
-//            throw new BusinessException("error.loan.deposit.bankAccount.balance.notEnough");
 
         loan.setPaid(true);
         loan.setFirstPaymentDate(LocalDate.now().plusMonths(1));
@@ -81,13 +77,10 @@ public class DepositLoanService {
         _installmentRepository.saveAll(list);
         _loanRepository.save(loan);
 
-        var loanAccountId = loan.getLoanAccount().getId();
-        var customerAccountId = loan.getCustomerAccount().getId();
-
         var transferDto = new TransferDto(loan.getAmount(),
-                "Debit for loan to customer account " + customerAccountId,
+                "Debit for loan to customer account " + loan.getCustomerAccount().getId(),
                 "Deposit loan Id " + depositLoanInputDto.getLoanId(),
-                loanAccountId, customerAccountId, userId, loan.getCurrency());
+                loan.getLoanAccount().getId(), loan.getCustomerAccount().getId(), userId, loan.getCurrency());
 
         _transactionService.transfer(transferDto);
     }

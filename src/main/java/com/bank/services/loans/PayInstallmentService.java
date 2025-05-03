@@ -6,6 +6,7 @@ import com.bank.dtos.transactions.TransferDto;
 import com.bank.exceptions.BusinessException;
 import com.bank.models.loans.Installment;
 import com.bank.repos.loans.InstallmentRepository;
+import com.bank.repos.loans.LoanRepository;
 import com.bank.services.transactions.TransactionService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,11 +18,14 @@ import java.time.LocalDateTime;
 public class PayInstallmentService {
     private final InstallmentRepository _installmentRepository;
     private final TransactionService _transactionService;
+    private final LoanRepository _loanRepository;
 
     public PayInstallmentService(InstallmentRepository installmentRepository,
-                                 TransactionService transactionService) {
+                                 TransactionService transactionService,
+                                 LoanRepository loanRepository) {
         _installmentRepository = installmentRepository;
         _transactionService = transactionService;
+        _loanRepository = loanRepository;
     }
 
     public SumNonPaidInstallmentOutputDto sumNonPaidInstallment(Long loanId, Integer payInstallmentCount) {
@@ -46,10 +50,14 @@ public class PayInstallmentService {
         if(payInstallmentInputDto.getInstallmentCount() <= 0)
             throw new BusinessException("error.loan.installments.count.invalid");
 
+        var loan = _loanRepository.findByLoanAccountId(payInstallmentInputDto.getLoanAccountId()).orElse(null);
+        if(loan == null)
+            throw new BusinessException("error.loan.noFound");
+
         var installments = _installmentRepository
                 .findTopCountByLoanIdAndPaidOrderByInstallmentNo(
                         payInstallmentInputDto.getInstallmentCount(),
-                        payInstallmentInputDto.getLoanId(),
+                        loan.getId(),
                         false);
 
         if(payInstallmentInputDto.getInstallmentCount() > installments.size())
@@ -68,14 +76,11 @@ public class PayInstallmentService {
 
         var currency = installments.getFirst().getCurrency();
 
-        // TODO: it's better to load Loan to get loanAccountId
-        var loanAccountId = payInstallmentInputDto.getLoanAccountId();
-
         var transferDto = new TransferDto(sumInstallmentsAmount,
                 "Pay " + payInstallmentInputDto.getInstallmentCount() +
-                        " installment(s) for loan Id " + payInstallmentInputDto.getLoanId(),
-                "Deposit for loan's installment(s) from account Id " + payInstallmentInputDto.getCustomerAccountId() + " and loan Id " + payInstallmentInputDto.getLoanId(),
-                payInstallmentInputDto.getCustomerAccountId(), loanAccountId, userId, currency);
+                        " installment(s) for loan Id " + loan.getId(),
+                "Deposit for loan's installment(s) from account Id " + payInstallmentInputDto.getCustomerAccountId() + " and loan Id " + loan.getId(),
+                payInstallmentInputDto.getCustomerAccountId(), payInstallmentInputDto.getLoanAccountId(), userId, currency);
 
         _transactionService.transfer(transferDto);
     }
