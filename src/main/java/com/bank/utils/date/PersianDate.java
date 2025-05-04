@@ -5,24 +5,72 @@ import java.io.Serializable;
 import java.time.LocalDate;
 import java.util.Objects;
 
+/**
+ * Represents a date in the Persian (Jalali) calendar system.
+ */
 @SuppressWarnings("unused")
 public final class PersianDate implements Serializable, Comparable<PersianDate> {
-    private final LocalDate _dateTime;
-
     @Serial
     private static final long serialVersionUID = 1L;
 
+    private final LocalDate date;
+
+    /**
+     * Creates a PersianDate instance with the minimum possible date.
+     */
     public PersianDate() {
-        _dateTime = LocalDate.MIN;
+        date = LocalDate.MIN;
     }
 
-    public PersianDate(LocalDate dateTime) {
-        _dateTime = LocalDate.of(dateTime.getYear(), dateTime.getMonthValue(), dateTime.getDayOfMonth());
+    /**
+     * Creates a PersianDate instance from a Gregorian LocalDate.
+     * @param gregorianDate the Gregorian date to convert
+     */
+    public PersianDate(LocalDate gregorianDate) {
+        date = LocalDate.of(gregorianDate.getYear(), gregorianDate.getMonthValue(), gregorianDate.getDayOfMonth());
     }
 
+    /**
+     * Creates a PersianDate instance from Persian year, month and day.
+     * @param year the Persian year (1..9999)
+     * @param month the Persian month (1..12)
+     * @param day the Persian day (1..31)
+     * @throws IllegalArgumentException if the date is invalid
+     */
     public PersianDate(int year, int month, int day) {
-        var gDate = jalali_to_gregorian(year, month, day);
-        _dateTime = LocalDate.of(gDate[0], gDate[1], gDate[2]);
+        validatePersianDate(year, month, day);
+        var gregorianDate = jalaliToGregorian(year, month, day);
+        date = LocalDate.of(gregorianDate[0], gregorianDate[1], gregorianDate[2]);
+    }
+
+    private void validatePersianDate(int year, int month, int day) {
+        if (year < 1 || year > 9999) {
+            throw new IllegalArgumentException("Year must be positive");
+        }
+        if (month < 1 || month > 12) {
+            throw new IllegalArgumentException("Month must be between 1 and 12");
+        }
+
+        int maxDay = (month < 7) ? 31 : 30;
+        maxDay = (month == 12 && !isLeapYear(year)) ? 29 : maxDay;
+
+        if (day < 1 || day > maxDay) {
+            throw new IllegalArgumentException(
+                    String.format("Day must be between 1 and %d for month %d", maxDay, month)
+            );
+        }
+    }
+
+    /**
+     * Checks if a Persian year is a leap year.
+     * @param year the Persian year
+     * @return true if it's a leap year
+     */
+    public static boolean isLeapYear(int year) {
+        int remainder = (year + 2346) % 33;
+        return remainder == 1 || remainder == 5 || remainder == 9 ||
+                remainder == 13 || remainder == 17 || remainder == 22 ||
+                remainder == 26 || remainder == 30;
     }
 
     @Override
@@ -34,12 +82,12 @@ public final class PersianDate implements Serializable, Comparable<PersianDate> 
             return false;
 
         PersianDate that = (PersianDate) o;
-        return Objects.equals(_dateTime, that._dateTime);
+        return Objects.equals(date, that.date);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(_dateTime);
+        return Objects.hash(date);
     }
 
     @Override
@@ -49,35 +97,52 @@ public final class PersianDate implements Serializable, Comparable<PersianDate> 
 
     @Override
     public int compareTo(PersianDate o) {
-        return _dateTime.compareTo(o._dateTime);
+        return date.compareTo(o.date);
     }
 
+    /**
+     * Formats the Persian date according to the specified pattern.
+     * @param format the format pattern
+     * @return formatted date string
+     */
     public String toString(String format) {
-        var jDate = gregorian_to_jalali(_dateTime.getYear(), _dateTime.getMonthValue(), _dateTime.getDayOfMonth());
-        var dayOfWeek = PersianDateResource.getWeekDayName(_dateTime.getDayOfWeek());
-        var monthName = PersianDateResource.getMonthName(jDate[1]);
-        return PersianDateFormat.format(jDate[0], jDate[1], jDate[2], dayOfWeek, monthName, format);
+        var jalaliDate = gregorianToJalali(date.getYear(), date.getMonthValue(), date.getDayOfMonth());
+        var dayOfWeek = PersianDateResource.getWeekDayName(date.getDayOfWeek());
+        var monthName = PersianDateResource.getMonthName(jalaliDate[1]);
+        return PersianDateFormat.format(jalaliDate[0], jalaliDate[1], jalaliDate[2], dayOfWeek, monthName, format);
     }
 
+    /**
+     * Converts the Persian date to an integer in yyyyMMdd format.
+     * @return the date as an integer
+     */
     public int toInteger() {
-        var jDate = gregorian_to_jalali(_dateTime.getYear(), _dateTime.getMonthValue(), _dateTime.getDayOfMonth());
-        return Integer.parseInt(PersianDateFormat.format(jDate));
+        var jalaliDate = gregorianToJalali(date.getYear(), date.getMonthValue(), date.getDayOfMonth());
+        return Integer.parseInt(PersianDateFormat.format(jalaliDate));
     }
 
-    private LocalDate toLocalDate() {
-        return LocalDate.of(_dateTime.getYear(), _dateTime.getMonthValue(), _dateTime.getDayOfMonth());
+    /**
+     * Converts this PersianDate to a LocalDate in Gregorian calendar.
+     * @return Gregorian LocalDate
+     */
+    public LocalDate toLocalDate() {
+        return LocalDate.of(date.getYear(), date.getMonthValue(), date.getDayOfMonth());
     }
 
+    /**
+     * Gets the current Persian date.
+     * @return current Persian date
+     */
     public static PersianDate now() {
         return new PersianDate(LocalDate.now());
     }
 
     /**
-     * Author: JDF.SCR.IR =>> Download Full Version :  <a href="http://jdf.scr.ir/jdf">...</a> License: GNU/LGPL _ Open
-     * Source & Free :: Version: 2.80 : [2020=1399]
-     * @noinspection DuplicatedCode
+     * Converts Gregorian date to Jalali (Persian) date
+     * Original algorithm by JDF.SCR.IR (<a href="http://jdf.scr.ir/jdf">...</a>)
+     * License: GNU/LGPL Open Source & Free
      */
-    private static int[] gregorian_to_jalali(int gy, int gm, int gd) {
+    private static int[] gregorianToJalali(int gy, int gm, int gd) {
         int[] out = {
                 (gm > 2) ? (gy + 1) : gy,
                 0,
@@ -110,11 +175,11 @@ public final class PersianDate implements Serializable, Comparable<PersianDate> 
     }
 
     /**
-     * Author: JDF.SCR.IR =>> Download Full Version :  <a href="http://jdf.scr.ir/jdf">...</a> License: GNU/LGPL _ Open
-     * Source & Free :: Version: 2.80 : [2020=1399]
-     * @noinspection DuplicatedCode
+     * Converts Jalali (Persian) date to Gregorian date
+     * Original algorithm by JDF.SCR.IR (<a href="http://jdf.scr.ir/jdf">...</a>)
+     * License: GNU/LGPL Open Source & Free
      */
-    private static int[] jalali_to_gregorian(int jy, int jm, int jd) {
+    private static int[] jalaliToGregorian(int jy, int jm, int jd) {
         jy += 1595;
         int[] out = {
                 0,
