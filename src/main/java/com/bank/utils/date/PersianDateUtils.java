@@ -3,7 +3,7 @@ package com.bank.utils.date;
 import java.time.DayOfWeek;
 
 @SuppressWarnings("unused")
-public final class PersianDateResource {
+public final class PersianDateUtils {
     private static final String[] dayNames = {
             "دوشنبه", "سه‌شنبه", "چهارشنبه", "پنج‌شنبه", "جمعه", "شنبه", "یک‌شنبه"
     };
@@ -33,5 +33,17 @@ public final class PersianDateResource {
 
     public static String getWeekDayName(DayOfWeek dayOfWeek) {
         return dayNames[dayOfWeek.getValue() - 1];
+    }
+
+    /**
+     * Checks if a Persian year is a leap year.
+     * @param year the Persian year
+     * @return true if it's a leap year
+     */
+    public static boolean isLeapYear(int year) {
+        int remainder = (year + 2346) % 33;
+        return remainder == 1 || remainder == 5 || remainder == 9 ||
+                remainder == 13 || remainder == 17 || remainder == 22 ||
+                remainder == 26 || remainder == 30;
     }
 }

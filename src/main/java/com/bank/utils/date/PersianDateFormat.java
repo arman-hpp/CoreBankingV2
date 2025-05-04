@@ -1,8 +1,8 @@
 package com.bank.utils.date;
 
 public final class PersianDateFormat {
-    public static String format(int[] jDate) {
-        return format(jDate[0], jDate[1], jDate[2], "", "", "");
+    public static String format(PersianDateValue persianDateValue) {
+        return format(persianDateValue.year(), persianDateValue.month(), persianDateValue.day(), "", "", "");
     }
 
     public static String format(int year, int month, int day, String dayOfWeek, String monthName, String format) {
