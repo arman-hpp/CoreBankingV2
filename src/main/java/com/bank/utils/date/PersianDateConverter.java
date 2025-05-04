@@ -2,6 +2,9 @@ package com.bank.utils.date;
 
 import java.time.LocalDate;
 
+/**
+ * Provides static methods to convert between Gregorian and Jalali (Persian) calendar systems.
+ */
 public final class PersianDateConverter {
     /**
      * Converts Gregorian date to Jalali (Persian) date

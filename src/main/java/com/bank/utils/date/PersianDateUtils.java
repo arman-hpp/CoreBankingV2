@@ -4,10 +4,12 @@ import java.time.DayOfWeek;
 
 @SuppressWarnings("unused")
 public final class PersianDateUtils {
+    // Persian weekday names starting from Monday (مطابق با DayOfWeek.getValue(): 1=Monday, ..., 7=Sunday)
     private static final String[] dayNames = {
             "دوشنبه", "سه‌شنبه", "چهارشنبه", "پنج‌شنبه", "جمعه", "شنبه", "یک‌شنبه"
     };
 
+    // Names of Persian calendar months
     private static final String[] monthNames = {
             "فروردین", "اردیبهشت", "خرداد",
             "تیر", "مرداد", "شهریور",
@@ -15,6 +17,12 @@ public final class PersianDateUtils {
             "دی", "بهمن", "اسفند"
     };
 
+    /**
+     * Gets the Persian name of a given month number.
+     * @param month the month number (1–12)
+     * @return name of the Persian month
+     * @throws IllegalArgumentException if the month number is invalid
+     */
     public static String getMonthName(int month) {
         if (month < 1 || month > 12)
             throw new IllegalArgumentException("month has invalid month");
@@ -22,6 +30,12 @@ public final class PersianDateUtils {
         return monthNames[month - 1];
     }
 
+    /**
+     * Gets the numeric month value (1–12) corresponding to a given Persian month name.
+     * @param monthName the name of the Persian month
+     * @return the numeric month (1–12)
+     * @throws IllegalArgumentException if the month name is not recognized
+     */
     public static int getMonthNumber(String monthName) {
         for (var i = 0; i < monthNames.length; i++) {
             if (monthNames[i].equals(monthName))
@@ -31,6 +45,11 @@ public final class PersianDateUtils {
         throw new IllegalArgumentException("monthName has invalid month name");
     }
 
+    /**
+     * Gets the Persian weekday name corresponding to a {@link DayOfWeek}.
+     * @param dayOfWeek the {@link DayOfWeek} enum (from java.time)
+     * @return the Persian name of the weekday
+     */
     public static String getWeekDayName(DayOfWeek dayOfWeek) {
         return dayNames[dayOfWeek.getValue() - 1];
     }

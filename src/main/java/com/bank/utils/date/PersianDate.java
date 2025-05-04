@@ -13,6 +13,7 @@ public final class PersianDate implements Serializable, Comparable<PersianDate> 
     @Serial
     private static final long serialVersionUID = 1L;
 
+    // Underlying Gregorian date used for internal storage and comparison
     private final LocalDate date;
 
     /**
@@ -37,12 +38,19 @@ public final class PersianDate implements Serializable, Comparable<PersianDate> 
      * Creates a PersianDate instance from Persian year, month and day.
      * @param year the Persian year (1..9999)
      * @param month the Persian month (1..12)
-     * @param day the Persian day (1..31)
+     * @param dayOfMonth the Persian day (1..31)
      * @throws IllegalArgumentException if the inputs is invalid
      */
-    public PersianDate(int year, int month, int day) {
-        PersianDateValidator.validate(year, month, day);
-        this.date = PersianDateConverter.jalaliToGregorian(year, month, day);
+    public PersianDate(int year, int month, int dayOfMonth) {
+        PersianDateValidator.validate(year, month, dayOfMonth);
+        this.date = PersianDateConverter.jalaliToGregorian(year, month, dayOfMonth);
+    }
+
+    /**
+     * Static factory method to create a PersianDate from year, month, and day.
+     */
+    public static PersianDate of(int year, int month, int dayOfMonth) {
+        return new PersianDate(year, month, dayOfMonth);
     }
 
     @Override
@@ -87,6 +95,7 @@ public final class PersianDate implements Serializable, Comparable<PersianDate> 
 
     /**
      * Converts the Persian date to an integer in yyyyMMdd format.
+     * Useful for sorting, comparisons, and database keys.
      * @return the date as an integer
      */
     public int toInteger() {
