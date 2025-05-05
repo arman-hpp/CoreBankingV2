@@ -5,12 +5,12 @@ import java.time.DayOfWeek;
 @SuppressWarnings("unused")
 public final class PersianDateUtils {
     // Persian weekday names starting from Monday (مطابق با DayOfWeek.getValue(): 1=Monday, ..., 7=Sunday)
-    private static final String[] dayNames = {
+    private static final String[] DAY_NAMES = {
             "دوشنبه", "سه‌شنبه", "چهارشنبه", "پنج‌شنبه", "جمعه", "شنبه", "یک‌شنبه"
     };
 
     // Names of Persian calendar months
-    private static final String[] monthNames = {
+    private static final String[] MONTH_NAMES = {
             "فروردین", "اردیبهشت", "خرداد",
             "تیر", "مرداد", "شهریور",
             "مهر", "آبان", "آذر",
@@ -25,9 +25,9 @@ public final class PersianDateUtils {
      */
     public static String getMonthName(int month) {
         if (month < 1 || month > 12)
-            throw new IllegalArgumentException("month has invalid month");
+            throw new IllegalArgumentException("Invalid Persian month number: " + month);
 
-        return monthNames[month - 1];
+        return MONTH_NAMES[month - 1];
     }
 
     /**
@@ -37,12 +37,16 @@ public final class PersianDateUtils {
      * @throws IllegalArgumentException if the month name is not recognized
      */
     public static int getMonthNumber(String monthName) {
-        for (var i = 0; i < monthNames.length; i++) {
-            if (monthNames[i].equals(monthName))
+        if (monthName == null) {
+            throw new IllegalArgumentException("Month name cannot be null");
+        }
+
+        for (var i = 0; i < MONTH_NAMES.length; i++) {
+            if (MONTH_NAMES[i].equals(monthName))
                 return i + 1;
         }
 
-        throw new IllegalArgumentException("monthName has invalid month name");
+        throw new IllegalArgumentException("Invalid Persian month name: " + monthName);
     }
 
     /**
@@ -51,7 +55,7 @@ public final class PersianDateUtils {
      * @return the Persian name of the weekday
      */
     public static String getWeekDayName(DayOfWeek dayOfWeek) {
-        return dayNames[dayOfWeek.getValue() - 1];
+        return DAY_NAMES[dayOfWeek.getValue() - 1];
     }
 
     /**
@@ -64,5 +68,21 @@ public final class PersianDateUtils {
         return remainder == 1 || remainder == 5 || remainder == 9 ||
                 remainder == 13 || remainder == 17 || remainder == 22 ||
                 remainder == 26 || remainder == 30;
+    }
+
+    /**
+     * Returns the maximum valid day for a given Persian year and month.
+     *
+     * @param year  the Persian year
+     * @param month the Persian month (1 through 12)
+     * @return the maximum valid day for the specified month and year
+     */
+    public static int getMaxDayOfMonth(int year, int month) {
+        if (month <= 6)
+            return 31;
+        else if (month <= 11)
+            return 30;
+        else
+            return isLeapYear(year) ? 30 : 29;
     }
 }

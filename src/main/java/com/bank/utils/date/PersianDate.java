@@ -29,9 +29,7 @@ public final class PersianDate implements Serializable, Comparable<PersianDate> 
      * @throws NullPointerException if the inputs is invalid
      */
     public PersianDate(LocalDate gregorianDate) {
-        if(gregorianDate == null)
-            throw new NullPointerException("gregorianDate must not be null");
-        this.date = LocalDate.of(gregorianDate.getYear(), gregorianDate.getMonthValue(), gregorianDate.getDayOfMonth());
+        this.date = Objects.requireNonNull(gregorianDate, "gregorianDate must not be null");
     }
 
     /**
@@ -53,6 +51,9 @@ public final class PersianDate implements Serializable, Comparable<PersianDate> 
         return new PersianDate(year, month, dayOfMonth);
     }
 
+    /**
+     * Checks equality based on the internal Gregorian date.
+     */
     @Override
     public boolean equals(Object o) {
         if (this == o)
@@ -65,16 +66,25 @@ public final class PersianDate implements Serializable, Comparable<PersianDate> 
         return Objects.equals(date, that.date);
     }
 
+    /**
+     * Returns hash code based on the internal date.
+     */
     @Override
     public int hashCode() {
         return Objects.hash(date);
     }
 
+    /**
+     * Returns string representation using default format.
+     */
     @Override
     public String toString() {
         return toString("d");
     }
 
+    /**
+     * Compares PersianDate instances based on the internal date.
+     */
     @Override
     public int compareTo(PersianDate o) {
         return date.compareTo(o.date);
@@ -86,7 +96,7 @@ public final class PersianDate implements Serializable, Comparable<PersianDate> 
      * @return formatted date string
      */
     public String toString(String format) {
-        var jalaliDate = PersianDateConverter.gregorianToJalali(date.getYear(), date.getMonthValue(), date.getDayOfMonth());
+        var jalaliDate = getJalaliDate();
         var dayOfWeek = PersianDateUtils.getWeekDayName(date.getDayOfWeek());
         var monthName = PersianDateUtils.getMonthName(jalaliDate.month());
         return PersianDateFormat.format(jalaliDate.year(), jalaliDate.month(), jalaliDate.day(),
@@ -99,9 +109,14 @@ public final class PersianDate implements Serializable, Comparable<PersianDate> 
      * @return the date as an integer
      */
     public int toInteger() {
-        var jalaliDate = PersianDateConverter.gregorianToJalali(date.getYear(), date.getMonthValue(), date.getDayOfMonth());
+        var jalaliDate = getJalaliDate();
         var formatted = PersianDateFormat.format(jalaliDate);
         return Integer.parseInt(formatted);
+    }
+
+    // Helper to reduce code duplication
+    private PersianDateValue getJalaliDate() {
+        return PersianDateConverter.gregorianToJalali(date.getYear(), date.getMonthValue(), date.getDayOfMonth());
     }
 
     /**
@@ -118,5 +133,29 @@ public final class PersianDate implements Serializable, Comparable<PersianDate> 
      */
     public static PersianDate now() {
         return new PersianDate(LocalDate.now());
+    }
+
+    /**
+     * Returns the Persian year part of this date.
+     * @return Persian year
+     */
+    public int getYear() {
+        return getJalaliDate().year();
+    }
+
+    /**
+     * Returns the Persian month part of this date.
+     * @return Persian month
+     */
+    public int getMonth() {
+        return getJalaliDate().month();
+    }
+
+    /**
+     * Returns the Persian day of month part of this date.
+     * @return Persian day of month
+     */
+    public int getDay() {
+        return getJalaliDate().day();
     }
 }
