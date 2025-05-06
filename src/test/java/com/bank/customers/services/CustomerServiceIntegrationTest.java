@@ -1,4 +1,4 @@
-package com.bank.services;
+package com.bank.customers.services;
 
 import com.bank.customers.dtos.CustomerDto;
 import com.bank.customers.repos.CustomerRepository;

@@ -1,4 +1,4 @@
-package com.bank.utils.date;
+package com.bank.core.utils.date;
 
 import com.bank.core.utils.date.PersianDateUtils;
 import org.junit.jupiter.api.Test;
