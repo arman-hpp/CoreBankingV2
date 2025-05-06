@@ -139,7 +139,7 @@
                 <version>3.5.3</version>
                 <configuration>
                     <argLine>
-                        -javaagent:${user.home}/.m2/repository/net/bytebuddy/byte-buddy-agent/1.15.11/byte-buddy-agent-1.15.11.jar
+                        -javaagent:${user.home}/.m2/repository/net/bytebuddy/byte-buddy-agent/1.17.5/byte-buddy-agent-1.17.5.jar
                         -Xshare:off
                     </argLine>
                 </configuration>
