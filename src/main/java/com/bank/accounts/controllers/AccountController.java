@@ -1,6 +1,7 @@
 package com.bank.accounts.controllers;
 
 import com.bank.accounts.dtos.AccountDto;
+import com.bank.accounts.dtos.AddAccountRequestDto;
 import com.bank.core.dtos.PagedResponseDto;
 import com.bank.accounts.services.AccountService;
 import org.springframework.web.bind.annotation.*;
@@ -59,7 +60,7 @@ public class AccountController {
     }
 
     @PostMapping("/")
-    public AccountDto addAccount(@RequestBody AccountDto accountDto) {
-        return _accountService.addAccount(accountDto);
+    public AccountDto addAccount(@RequestBody AddAccountRequestDto requestDto) {
+        return _accountService.addAccount(requestDto);
     }
 }

@@ -1,5 +1,6 @@
 package com.bank.accounts.services;
 
+import com.bank.accounts.dtos.AddAccountRequestDto;
 import com.bank.core.dtos.PagedResponseDto;
 import com.bank.accounts.dtos.AccountDto;
 import com.bank.core.enums.Currencies;
@@ -132,6 +133,27 @@ public class AccountService {
     }
 
     /**
+     * Creates a new account with the provided account details.
+     * @param accountDto the account data transfer object containing the information for the new account
+     * @return the created AccountDto with generated ID and additional saved information
+     */
+    public AccountDto addAccount(AddAccountRequestDto accountDto) {
+        if(accountDto.getCustomerId() == null) {
+            throw new BusinessException("error.account.notCustomerFound");
+        }
+
+        var account = new Account();
+        account.setCurrency(accountDto.getCurrency());
+        account.setBalance(BigDecimal.valueOf(0L));
+        account.setSubLedger(new SubLedger(accountDto.getSubLedgerId()));
+        account.setCustomer(new Customer(accountDto.getCustomerId()));
+
+        _accountRepository.save(account);
+
+        return mapAccountToDto(account);
+    }
+
+    /**
      * Maps an Account entity to its corresponding AccountDto.
      * @param account the Account entity to be converted
      * @return the mapped AccountDto containing the account's data
@@ -158,26 +180,4 @@ public class AccountService {
 
         return accountDto;
     }
-
-    /**
-     * Creates a new account with the provided account details.
-     * @param accountDto the account data transfer object containing the information for the new account
-     * @return the created AccountDto with generated ID and additional saved information
-     */
-    public AccountDto addAccount(AccountDto accountDto) {
-        if(accountDto.getCustomerId() == null) {
-            throw new BusinessException("error.account.notCustomerFound");
-        }
-
-        var account = _modelMapper.map(accountDto, Account.class);
-        account.setBalance(BigDecimal.valueOf(0L));
-        account.setSubLedger(new SubLedger(accountDto.getSubLedgerId()));
-        account.setCustomer(new Customer(accountDto.getCustomerId()));
-
-        _accountRepository.save(account);
-
-        accountDto.setId(account.getId());
-        return accountDto;
-    }
-
 }

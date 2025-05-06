@@ -1,6 +1,6 @@
 package com.bank.loans.services;
 
-import com.bank.accounts.dtos.AccountDto;
+import com.bank.accounts.dtos.AddAccountRequestDto;
 import com.bank.core.exceptions.BusinessException;
 import com.bank.accounts.models.Account;
 import com.bank.loans.repos.InstallmentRepository;
@@ -17,7 +17,6 @@ import com.bank.customers.services.CustomerService;
 import com.bank.loans.services.interfaces.ILoanValidator;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -123,12 +122,11 @@ public class LoanService {
         var loanConditionsDto = _loanConditionsService.loadLoanCondition(loanDto.getCurrency());
         _loanValidator.validate(loanConditionsDto, loanDto);
 
-        var accountDto = new AccountDto();
-        accountDto.setCurrency(loanDto.getCurrency());
-        accountDto.setCustomerId(loanDto.getCustomerId());
-        accountDto.setBalance(BigDecimal.ZERO);
-        accountDto.setSubLedgerId(loanDto.getSubLedgerId());
-        var newAccountDto = _accountService.addAccount(accountDto);
+        var requestDto = new AddAccountRequestDto();
+        requestDto.setCurrency(loanDto.getCurrency());
+        requestDto.setCustomerId(loanDto.getCustomerId());
+        requestDto.setSubLedgerId(loanDto.getSubLedgerId());
+        var newAccountDto = _accountService.addAccount(requestDto);
 
         var loan = _modelMapper.map(loanDto, Loan.class);
         loan.setCustomer(new Customer(loanDto.getCustomerId()));
