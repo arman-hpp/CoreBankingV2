@@ -2,7 +2,6 @@ package com.bank.customers.services;
 
 import com.bank.customers.dtos.CustomerDto;
 import com.bank.customers.repos.CustomerRepository;
-import com.bank.customers.services.CustomerService;
 import org.junit.jupiter.api.*;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
