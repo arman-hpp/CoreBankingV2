@@ -9,17 +9,17 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/accounts")
 public class AccountController {
-    private final AccountService _accountService;
+    private final AccountService accountService;
 
     public AccountController(AccountService accountService) {
-        _accountService = accountService;
+        this.accountService = accountService;
     }
 
     @GetMapping("/")
     public PagedResponseDto<AccountResponseDto> getAllAccounts(
             @RequestParam(defaultValue = "0") Integer page,
             @RequestParam(defaultValue = "10") Integer size) {
-        return _accountService.loadAccounts(page, size);
+        return accountService.loadAccounts(page, size);
     }
 
     @GetMapping("/by/customer")
@@ -27,7 +27,7 @@ public class AccountController {
             @RequestParam Long customerId,
             @RequestParam(defaultValue = "0") Integer page,
             @RequestParam(defaultValue = "10") Integer size) {
-        return _accountService.loadCustomerAccounts(customerId, page, size);
+        return accountService.loadCustomerAccounts(customerId, page, size);
     }
 
     @GetMapping("/by/subLedger")
@@ -35,7 +35,7 @@ public class AccountController {
             @RequestParam Long subLedgerId,
             @RequestParam(defaultValue = "0") Integer page,
             @RequestParam(defaultValue = "10") Integer size) {
-        return _accountService.loadAccountsBySubLedgerId(subLedgerId, page, size);
+        return accountService.loadAccountsBySubLedgerId(subLedgerId, page, size);
     }
 
     @GetMapping("/by/generalLedger")
@@ -43,7 +43,7 @@ public class AccountController {
             @RequestParam Long generalLedgerId,
             @RequestParam(defaultValue = "0") Integer page,
             @RequestParam(defaultValue = "10") Integer size) {
-        return _accountService.loadAccountsByGeneralLedgerId(generalLedgerId, page, size);
+        return accountService.loadAccountsByGeneralLedgerId(generalLedgerId, page, size);
     }
 
     @GetMapping("/by/ledger")
@@ -51,16 +51,16 @@ public class AccountController {
             @RequestParam Long ledgerId,
             @RequestParam(defaultValue = "0") Integer page,
             @RequestParam(defaultValue = "10") Integer size) {
-        return _accountService.loadAccountsByLedgerId(ledgerId, page, size);
+        return accountService.loadAccountsByLedgerId(ledgerId, page, size);
     }
 
     @GetMapping("/{id}")
     public AccountResponseDto getAccountById(@PathVariable Long id) {
-        return _accountService.loadAccount(id);
+        return accountService.loadAccount(id);
     }
 
     @PostMapping("/")
     public AccountResponseDto addAccount(@RequestBody AddAccountRequestDto requestDto) {
-        return _accountService.addAccount(requestDto);
+        return accountService.addAccount(requestDto);
     }
 }
