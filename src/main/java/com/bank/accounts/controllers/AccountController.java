@@ -1,6 +1,6 @@
 package com.bank.accounts.controllers;
 
-import com.bank.accounts.dtos.AccountDto;
+import com.bank.accounts.dtos.AccountResponseDto;
 import com.bank.accounts.dtos.AddAccountRequestDto;
 import com.bank.core.dtos.PagedResponseDto;
 import com.bank.accounts.services.AccountService;
@@ -16,14 +16,14 @@ public class AccountController {
     }
 
     @GetMapping("/")
-    public PagedResponseDto<AccountDto> getAllAccounts(
+    public PagedResponseDto<AccountResponseDto> getAllAccounts(
             @RequestParam(defaultValue = "0") Integer page,
             @RequestParam(defaultValue = "10") Integer size) {
         return _accountService.loadAccounts(page, size);
     }
 
     @GetMapping("/by/customer")
-    public PagedResponseDto<AccountDto> getCustomerAccounts(
+    public PagedResponseDto<AccountResponseDto> getCustomerAccounts(
             @RequestParam Long customerId,
             @RequestParam(defaultValue = "0") Integer page,
             @RequestParam(defaultValue = "10") Integer size) {
@@ -31,7 +31,7 @@ public class AccountController {
     }
 
     @GetMapping("/by/subLedger")
-    public PagedResponseDto<AccountDto> getAccountsBySubLedger(
+    public PagedResponseDto<AccountResponseDto> getAccountsBySubLedger(
             @RequestParam Long subLedgerId,
             @RequestParam(defaultValue = "0") Integer page,
             @RequestParam(defaultValue = "10") Integer size) {
@@ -39,7 +39,7 @@ public class AccountController {
     }
 
     @GetMapping("/by/generalLedger")
-    public PagedResponseDto<AccountDto> getAccountsByGeneralLedger(
+    public PagedResponseDto<AccountResponseDto> getAccountsByGeneralLedger(
             @RequestParam Long generalLedgerId,
             @RequestParam(defaultValue = "0") Integer page,
             @RequestParam(defaultValue = "10") Integer size) {
@@ -47,7 +47,7 @@ public class AccountController {
     }
 
     @GetMapping("/by/ledger")
-    public PagedResponseDto<AccountDto> getAccountsByLedger(
+    public PagedResponseDto<AccountResponseDto> getAccountsByLedger(
             @RequestParam Long ledgerId,
             @RequestParam(defaultValue = "0") Integer page,
             @RequestParam(defaultValue = "10") Integer size) {
@@ -55,12 +55,12 @@ public class AccountController {
     }
 
     @GetMapping("/{id}")
-    public AccountDto getAccountById(@PathVariable Long id) {
+    public AccountResponseDto getAccountById(@PathVariable Long id) {
         return _accountService.loadAccount(id);
     }
 
     @PostMapping("/")
-    public AccountDto addAccount(@RequestBody AddAccountRequestDto requestDto) {
+    public AccountResponseDto addAccount(@RequestBody AddAccountRequestDto requestDto) {
         return _accountService.addAccount(requestDto);
     }
 }

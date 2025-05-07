@@ -14,7 +14,7 @@ import java.math.BigDecimal;
 @NoArgsConstructor
 @Getter
 @Setter
-public class AccountDto extends BaseDto {
+public class AccountResponseDto extends BaseDto {
     private Long id;
     private BigDecimal balance;
     private Currencies currency;

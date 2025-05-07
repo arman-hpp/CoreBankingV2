@@ -1,6 +1,6 @@
 package com.bank.customers.services;
 
-import com.bank.customers.dtos.CustomerDto;
+import com.bank.customers.dtos.AddCustomerRequestDto;
 import com.bank.customers.repos.CustomerRepository;
 import org.junit.jupiter.api.*;
 import org.modelmapper.ModelMapper;
@@ -31,12 +31,12 @@ public class CustomerServiceIntegrationTest {
     @Test
     @Order(1)
     void addCustomer_shouldPersistToDatabase() {
-        var dto = new CustomerDto();
+        var dto = new AddCustomerRequestDto();
         dto.setFirstName("Arman");
         dto.setLastName("Hasanpour");
         dto.setAddress("Iran, Mazandaran, Babol, Tohid 20");
 
-        var saved = customerService.addOrEditCustomer(dto);
+        var saved = customerService.addCustomer(dto);
 
         assertNotNull(saved.getId());
 

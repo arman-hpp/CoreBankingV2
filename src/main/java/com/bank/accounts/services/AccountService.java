@@ -1,8 +1,8 @@
 package com.bank.accounts.services;
 
+import com.bank.accounts.dtos.AccountResponseDto;
 import com.bank.accounts.dtos.AddAccountRequestDto;
 import com.bank.core.dtos.PagedResponseDto;
-import com.bank.accounts.dtos.AccountDto;
 import com.bank.core.enums.Currencies;
 import com.bank.core.exceptions.BusinessException;
 import com.bank.accounts.models.Account;
@@ -36,9 +36,9 @@ public class AccountService {
      * Retrieves a paginated list of all accounts with all details.
      * @param page page the page number to retrieve (0-based index)
      * @param size size the number of accounts per page
-     * @return a PagedResponseDto containing a list of AccountDto objects and pagination metadata
+     * @return a PagedResponseDto containing a list of AccountResponseDto objects and pagination metadata
      */
-    public PagedResponseDto<AccountDto> loadAccounts(int page, int size) {
+    public PagedResponseDto<AccountResponseDto> loadAccounts(int page, int size) {
         var pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "Id"));
         var accounts = _accountRepository.findAllWithDetails(pageable);
         var results = accounts.map(this::mapAccountToDto);
@@ -49,9 +49,9 @@ public class AccountService {
      * Retrieves a paginated list of accounts by specific currency with all details.
      * @param page page the page number to retrieve (0-based index)
      * @param size size the number of accounts per page
-     * @return a PagedResponseDto containing a list of AccountDto objects and pagination metadata
+     * @return a PagedResponseDto containing a list of AccountResponseDto objects and pagination metadata
      */
-    public PagedResponseDto<AccountDto> loadAccounts(Currencies currency, int page, int size) {
+    public PagedResponseDto<AccountResponseDto> loadAccounts(Currencies currency, int page, int size) {
         var pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "Id"));
         var accounts = _accountRepository.findByCurrencyWithDetails(currency, pageable);
         var results = accounts.map(this::mapAccountToDto);
@@ -63,9 +63,9 @@ public class AccountService {
      * @param subLedgerId the ID of the sub-ledger to filter accounts by
      * @param page the page number to retrieve (0-based index)
      * @param size the number of accounts per page
-     * @return a PagedResponseDto containing a list of AccountDto objects matching the criteria
+     * @return a PagedResponseDto containing a list of AccountResponseDto objects matching the criteria
      */
-    public PagedResponseDto<AccountDto> loadAccountsBySubLedgerId(Long subLedgerId, int page, int size) {
+    public PagedResponseDto<AccountResponseDto> loadAccountsBySubLedgerId(Long subLedgerId, int page, int size) {
         var pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "Id"));
         var accounts = _accountRepository.findBySubLedgerIdWithDetails(subLedgerId, pageable);
         var results = accounts.map(this::mapAccountToDto);
@@ -77,9 +77,9 @@ public class AccountService {
      * @param generalLedgerId the ID of the general-ledger to filter accounts by
      * @param page the page number to retrieve (0-based index)
      * @param size the number of accounts per page
-     * @return a PagedResponseDto containing a list of AccountDto objects matching the criteria
+     * @return a PagedResponseDto containing a list of AccountResponseDto objects matching the criteria
      */
-    public PagedResponseDto<AccountDto> loadAccountsByGeneralLedgerId(Long generalLedgerId, int page, int size) {
+    public PagedResponseDto<AccountResponseDto> loadAccountsByGeneralLedgerId(Long generalLedgerId, int page, int size) {
         var pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "Id"));
         var accounts = _accountRepository.findByGeneralLedgerIdWithDetails(generalLedgerId, pageable);
         var results = accounts.map(this::mapAccountToDto);
@@ -91,9 +91,9 @@ public class AccountService {
      * @param ledgerId the ID of the general-ledger to filter accounts by
      * @param page the page number to retrieve (0-based index)
      * @param size the number of accounts per page
-     * @return a PagedResponseDto containing a list of AccountDto objects matching the criteria
+     * @return a PagedResponseDto containing a list of AccountResponseDto objects matching the criteria
      */
-    public PagedResponseDto<AccountDto> loadAccountsByLedgerId(Long ledgerId, int page, int size) {
+    public PagedResponseDto<AccountResponseDto> loadAccountsByLedgerId(Long ledgerId, int page, int size) {
         var pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "Id"));
         var accounts = _accountRepository.findByLedgerIdWithDetails(ledgerId, pageable);
         var results = accounts.map(this::mapAccountToDto);
@@ -103,9 +103,9 @@ public class AccountService {
     /**
      * Retrieves the details of a specific account by its ID.
      * @param accountId the unique identifier of the account to load
-     * @return the AccountDto containing account details
+     * @return the AccountResponseDto containing account details
      */
-    public AccountDto loadAccount(Long accountId) {
+    public AccountResponseDto loadAccount(Long accountId) {
         var account = _accountRepository.findWithDetails(accountId).orElse(null);
         if(account == null)
             throw new BusinessException("error.account.notFound");
@@ -118,9 +118,9 @@ public class AccountService {
      * @param customerId the unique identifier of the customer to load
      * @param page page the page number to retrieve (0-based index)
      * @param size size the number of accounts per page
-     * @return a PagedResponseDto containing a list of AccountDto objects and pagination metadata
+     * @return a PagedResponseDto containing a list of AccountResponseDto objects and pagination metadata
      */
-    public PagedResponseDto<AccountDto> loadCustomerAccounts(Long customerId, int page, int size) {
+    public PagedResponseDto<AccountResponseDto> loadCustomerAccounts(Long customerId, int page, int size) {
         var customer = _customerRepository.findById(customerId).orElse(null);
         if(customer == null)
             throw new BusinessException("error.customer.notFound");
@@ -135,9 +135,9 @@ public class AccountService {
     /**
      * Creates a new account with the provided account details.
      * @param accountDto the account data transfer object containing the information for the new account
-     * @return the created AccountDto with generated ID and additional saved information
+     * @return the created AccountResponseDto with generated ID and additional saved information
      */
-    public AccountDto addAccount(AddAccountRequestDto accountDto) {
+    public AccountResponseDto addAccount(AddAccountRequestDto accountDto) {
         if(accountDto.getCustomerId() == null) {
             throw new BusinessException("error.account.notCustomerFound");
         }
@@ -156,10 +156,10 @@ public class AccountService {
     /**
      * Maps an Account entity to its corresponding AccountDto.
      * @param account the Account entity to be converted
-     * @return the mapped AccountDto containing the account's data
+     * @return the mapped AccountResponseDto containing the account's data
      */
-    private AccountDto mapAccountToDto(Account account) {
-        var accountDto = _modelMapper.map(account, AccountDto.class);
+    private AccountResponseDto mapAccountToDto(Account account) {
+        var accountDto = _modelMapper.map(account, AccountResponseDto.class);
 
         var subLedger = account.getSubLedger();
         accountDto.setSubLedgerId(subLedger.getId());
