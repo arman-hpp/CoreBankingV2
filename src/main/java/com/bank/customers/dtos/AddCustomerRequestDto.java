@@ -1,6 +1,9 @@
 package com.bank.customers.dtos;
 
 import com.bank.core.dtos.BaseDto;
+import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -10,8 +13,19 @@ import lombok.Setter;
 @NoArgsConstructor
 @Getter
 @Setter
+@Schema(description = "DTO for adding a new customer")
 public class AddCustomerRequestDto extends BaseDto {
+    @NotBlank
+    @Size(max = 50)
+    @Schema(description = "First name of the customer", example = "Arman")
     private String firstName;
+
+    @NotBlank
+    @Size(max = 50)
+    @Schema(description = "Last name of the customer", example = "Hasanpour")
     private String lastName;
+
+    @Size(max = 255)
+    @Schema(description = "Customer address", example = "Tehran, Vanak Square")
     private String address;
 }
