@@ -18,7 +18,6 @@ import java.util.Set;
 @NoArgsConstructor
 @Entity
 @Table(name = "Customers")
-@SuppressWarnings("JpaDataSourceORMInspection")
 public class Customer extends BaseEntity {
     @Column(name = "first_name", length = 40, nullable = false)
     private String firstName;
@@ -28,6 +27,16 @@ public class Customer extends BaseEntity {
 
     @Column(name = "address",length = 100, nullable = false)
     private String address;
+
+//    @Column(name = "birth_date", nullable = false)
+//    private LocalDate birthDate;
+//
+//    @Column(name = "gender", nullable = false)
+//    @Enumerated(EnumType.ORDINAL)
+//    private Genders gender;
+//
+//    @Column(name = "identity_card_number",length = 100, nullable = false)
+//    private String identityCardNumber;
 
     @ElementCollection(targetClass = Address.class, fetch = FetchType.EAGER)
     private Set<Address> addresses;

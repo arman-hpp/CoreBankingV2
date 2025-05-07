@@ -14,7 +14,6 @@ import java.util.Set;
 @NoArgsConstructor
 @Entity
 @Table(name = "Ledgers")
-@SuppressWarnings("JpaDataSourceORMInspection")
 public class Ledger extends BaseEntity {
     @Column(name = "code", length = 20, nullable = false, unique = true)
     private String code;
