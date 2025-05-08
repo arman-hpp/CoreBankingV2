@@ -1,6 +1,7 @@
 package com.bank.customers.services;
 
 import com.bank.core.dtos.PagedResponseDto;
+import com.bank.core.dtos.PaginationRequestDto;
 import com.bank.core.dtos.filters.FilterInfoDto;
 import com.bank.customers.dtos.AddCustomerRequestDto;
 import com.bank.core.exceptions.BusinessException;
@@ -31,8 +32,8 @@ public class CustomerService {
     }
 
     @Cacheable(value = "customers", key="'customers-page-'+#page + '-' + #size")
-    public PagedResponseDto<CustomerResponseDto> loadCustomers(int page, int size) {
-        var pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "Id"));
+    public PagedResponseDto<CustomerResponseDto> loadCustomers(PaginationRequestDto paginationDto) {
+        var pageable = PageRequest.of(paginationDto.getPageNumber(), paginationDto.getPageSize(), Sort.by(Sort.Direction.DESC, "Id"));
         var customers = _customerRepository.findAll(pageable);
         var results = customers.map(customer -> _modelMapper.map(customer, CustomerResponseDto.class));
         return new PagedResponseDto<>(results);
@@ -59,8 +60,8 @@ public class CustomerService {
     }, put = {
             @CachePut(cacheNames = "customer", key = "#customerDto.id")
     })
-    public CustomerResponseDto editCustomer(EditCustomerRequestDto customerDto) {
-        var customer = _customerRepository.findById(customerDto.getId()).orElse(null);
+    public CustomerResponseDto editCustomer(Long customerId, EditCustomerRequestDto customerDto) {
+        var customer = _customerRepository.findById(customerId).orElse(null);
         if (customer == null)
             throw new BusinessException("error.customer.notFound");
 

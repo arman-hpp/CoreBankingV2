@@ -15,9 +15,6 @@ import lombok.Setter;
 @Setter
 @Schema(description = "DTO for editing an existing customer")
 public class EditCustomerRequestDto extends BaseDto {
-    @Schema(description = "ID of the customer to be edited", example = "5")
-    private Long id;
-
     @NotBlank
     @Size(max = 50)
     @Schema(description = "First name of the customer", example = "Arman")
