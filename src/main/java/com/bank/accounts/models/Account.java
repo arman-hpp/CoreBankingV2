@@ -49,6 +49,6 @@ public class Account extends BaseEntity {
             return AccountTypes.BANK_ACCOUNT;
         if("Customer Deposits".equals(glTitle))
             return AccountTypes.CUSTOMER_ACCOUNT;
-        return AccountTypes.UNKNOWN_ACCOUNT;
+        return AccountTypes.UNKNOWN;
     }
 }
