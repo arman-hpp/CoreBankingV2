@@ -52,8 +52,8 @@ public class CustomerController {
     @ResponseStatus(HttpStatus.CREATED)
     @Operation(summary = "Add a new customer", description = "Create a new customer with the provided data")
     public CustomerResponseDto addCustomer(
-            @Valid @RequestBody final AddCustomerRequestDto customerDto) {
-        return customerService.addCustomer(customerDto);
+            @Valid @RequestBody final AddCustomerRequestDto addCustomerDto) {
+        return customerService.addCustomer(addCustomerDto);
     }
 
     @PutMapping("/{id}")
@@ -61,9 +61,9 @@ public class CustomerController {
     public CustomerResponseDto editCustomer(
             @Parameter(description = "ID of the customer to update", example = "1")
             @PathVariable final Long id,
-            @Valid @RequestBody final EditCustomerRequestDto customerDto) {
-        customerDto.setId(id);
-        return customerService.editCustomer(customerDto);
+            @Valid @RequestBody final EditCustomerRequestDto editCustomerDto) {
+        editCustomerDto.setId(id);
+        return customerService.editCustomer(editCustomerDto);
     }
 
     @DeleteMapping("/{id}")
