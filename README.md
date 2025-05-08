@@ -19,6 +19,7 @@ This project is a banking software solution designed around the concept of `Inte
 * [Apache POI Common](https://mvnrepository.com/artifact/org.apache.poi/poi)
 * [Apache Commons CSV](https://mvnrepository.com/artifact/org.apache.commons/commons-csv)
 * [IText Core](https://mvnrepository.com/artifact/com.itextpdf/itextpdf)
+* [SpringDoc OpenAPI Starter WebMVC UI](https://mvnrepository.com/artifact/org.springdoc/springdoc-openapi-starter-webmvc-ui)
 
 ### Installation
 * `git clone https://github.com/arman-hpp/CoreBanking`
