@@ -8,6 +8,7 @@ import com.bank.customers.dtos.EditCustomerRequestDto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import com.bank.customers.services.CustomerService;
@@ -51,7 +52,7 @@ public class CustomerController {
     @ResponseStatus(HttpStatus.CREATED)
     @Operation(summary = "Add a new customer", description = "Create a new customer with the provided data")
     public CustomerResponseDto addCustomer(
-            @RequestBody final AddCustomerRequestDto customerDto) {
+            @Valid @RequestBody final AddCustomerRequestDto customerDto) {
         return customerService.addCustomer(customerDto);
     }
 
@@ -60,7 +61,7 @@ public class CustomerController {
     public CustomerResponseDto editCustomer(
             @Parameter(description = "ID of the customer to update", example = "1")
             @PathVariable final Long id,
-            @RequestBody final EditCustomerRequestDto customerDto) {
+            @Valid @RequestBody final EditCustomerRequestDto customerDto) {
         customerDto.setId(id);
         return customerService.editCustomer(customerDto);
     }
