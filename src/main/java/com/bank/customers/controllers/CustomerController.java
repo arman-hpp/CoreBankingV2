@@ -6,6 +6,7 @@ import com.bank.core.dtos.filters.FilterInfoDto;
 import com.bank.customers.dtos.AddCustomerRequestDto;
 import com.bank.customers.dtos.CustomerResponseDto;
 import com.bank.customers.dtos.EditCustomerRequestDto;
+import com.bank.customers.services.CustomerService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -15,7 +16,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import com.bank.customers.services.CustomerService;
 
 @RestController
 @RequestMapping("/api/customers")
