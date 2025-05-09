@@ -27,13 +27,11 @@ public class PaginationRequestDto extends BaseDto {
     @Schema(defaultValue = "10", minimum = "1")
     private int pageSize;
 
-    // TODO: add sortBy and direction
+    @Parameter(description = "Sort by field", example = "Id")
+    @Schema(defaultValue = "Id")
+    private String sortBy = "Id";
 
-    //@Parameter(description = "Sort by field", example = "name")
-    //@Schema(defaultValue = "id")
-    // private String sortBy = "id";
-
-    //@Parameter(description = "Sort direction", example = "asc")
-    //@Schema(allowableValues = {"asc", "desc"}, defaultValue = "asc")
-    // private String direction = "asc";
+    @Parameter(description = "Sort direction", example = "ASC")
+    @Schema(allowableValues = {"ASC", "DESC"}, defaultValue = "ASC")
+    private String direction = "ASC";
 }

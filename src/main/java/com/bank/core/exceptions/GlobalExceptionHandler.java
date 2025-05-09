@@ -16,7 +16,6 @@ import java.util.stream.Collectors;
 
 @ControllerAdvice
 public class GlobalExceptionHandler {
-
     private static final Logger logger = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
     private final MessageSource messageSource;
@@ -27,17 +26,15 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(BusinessException.class)
     public ResponseEntity<ApiErrorResponse> handleBusinessException(BusinessException ex, Locale locale) {
-        logger.warn("Business exception occurred: {}", ex.getMessage(), ex);
+        logger.warn("Business exception: {}", ex.getMessage(), ex);
         var message = messageSource.getMessage(ex.getResourceKey(), ex.getArgs(), locale);
         return buildResponse("Business Error", message, HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ApiErrorResponse> handleValidationException(MethodArgumentNotValidException ex, Locale locale) {
-        logger.warn("Validation error occurred: {}", ex.getMessage(), ex);
-        var errors = ex.getBindingResult()
-                .getFieldErrors()
-                .stream()
+        logger.warn("Validation exception: {}", ex.getMessage(), ex);
+        var errors = ex.getBindingResult().getFieldErrors().stream()
                 .map(fieldError -> fieldError.getField() + ": " + fieldError.getDefaultMessage())
                 .collect(Collectors.toList());
         var joinedErrors = String.join(", ", errors);
@@ -66,6 +63,6 @@ public class GlobalExceptionHandler {
                 status.value(),
                 LocalDateTime.now()
         );
-        return new ResponseEntity<>(response, status);
+        return ResponseEntity.status(status).body(response);
     }
 }

@@ -13,11 +13,13 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import com.bank.customers.services.CustomerService;
 
 @RestController
 @RequestMapping("/api/customers")
+@Validated
 @Tag(name = "Customers", description = "APIs for managing customers")
 public class CustomerController {
     private final CustomerService customerService;

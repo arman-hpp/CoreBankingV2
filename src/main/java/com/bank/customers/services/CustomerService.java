@@ -23,52 +23,52 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class CustomerService {
-    private final CustomerRepository _customerRepository;
-    private final ModelMapper _modelMapper;
+    private final CustomerRepository customerRepository;
+    private final ModelMapper modelMapper;
 
     public CustomerService(CustomerRepository customerRepository, ModelMapper modelMapper) {
-        _customerRepository = customerRepository;
-        _modelMapper = modelMapper;
+        this.customerRepository = customerRepository;
+        this.modelMapper = modelMapper;
     }
 
-    @Cacheable(value = "customers", key="'customers-page-'+#page + '-' + #size")
+    @Cacheable(value = "customers", key="'customers-page-'+#paginationDto.pageNumber + '-' + #paginationDto.pageSize")
     public PagedResponseDto<CustomerResponseDto> loadCustomers(PaginationRequestDto paginationDto) {
         var pageable = PageRequest.of(paginationDto.getPageNumber(), paginationDto.getPageSize(), Sort.by(Sort.Direction.DESC, "Id"));
-        var customers = _customerRepository.findAll(pageable);
-        var results = customers.map(customer -> _modelMapper.map(customer, CustomerResponseDto.class));
-        return new PagedResponseDto<>(results);
+        var customers = customerRepository.findAll(pageable);
+        var customerDtos = customers.map(customer -> modelMapper.map(customer, CustomerResponseDto.class));
+        return new PagedResponseDto<>(customerDtos);
     }
 
     @Cacheable(value = "customer", key = "#customerId")
     public CustomerResponseDto loadCustomer(Long customerId) {
-        var customer = _customerRepository.findById(customerId).orElse(null);
+        var customer = customerRepository.findById(customerId).orElse(null);
         if (customer == null)
             throw new BusinessException("error.customer.notFound");
 
-        return _modelMapper.map(customer, CustomerResponseDto.class);
+        return modelMapper.map(customer, CustomerResponseDto.class);
     }
 
     @CacheEvict(value = "customers", allEntries = true)
     public CustomerResponseDto addCustomer(AddCustomerRequestDto customerDto) {
-        var customer = _modelMapper.map(customerDto, Customer.class);
-        _customerRepository.save(customer);
-        return _modelMapper.map(customer, CustomerResponseDto.class);
+        var customer = modelMapper.map(customerDto, Customer.class);
+        customerRepository.save(customer);
+        return modelMapper.map(customer, CustomerResponseDto.class);
     }
 
     @Caching(evict = {
             @CacheEvict(value = "customers", allEntries = true)
     }, put = {
-            @CachePut(cacheNames = "customer", key = "#customerDto.id")
+            @CachePut(cacheNames = "customer", key = "#customerId")
     })
     public CustomerResponseDto editCustomer(Long customerId, EditCustomerRequestDto customerDto) {
-        var customer = _customerRepository.findById(customerId).orElse(null);
+        var customer = customerRepository.findById(customerId).orElse(null);
         if (customer == null)
             throw new BusinessException("error.customer.notFound");
 
-        _modelMapper.map(customerDto, customer);
-        _customerRepository.save(customer);
+        modelMapper.map(customerDto, customer);
+        customerRepository.save(customer);
 
-        return _modelMapper.map(customer, CustomerResponseDto.class);
+        return modelMapper.map(customer, CustomerResponseDto.class);
     }
 
     @Caching(evict = {
@@ -76,12 +76,12 @@ public class CustomerService {
             @CacheEvict(cacheNames = "customer", key = "#customerId")
     })
     public void removeCustomer(Long customerId) {
-        var customer = _customerRepository.findById(customerId).orElse(null);
+        var customer = customerRepository.findById(customerId).orElse(null);
         if (customer == null)
             throw new BusinessException("error.customer.notFound");
 
         try {
-            _customerRepository.delete(customer);
+            customerRepository.delete(customer);
         }
         catch (DataIntegrityViolationException ex) {
             throw new BusinessException("error.public.dependent.entity");
@@ -96,11 +96,11 @@ public class CustomerService {
                         filterInfo.getFilterSort().getProps())
         );
         var filtersList = filterInfo.getFilters().stream()
-                .map(f -> _modelMapper.map(f, BaseFilter.class))
+                .map(f -> modelMapper.map(f, BaseFilter.class))
                 .toList();
         var spec = new FilterSpecification<Customer>(filtersList);
-        var customers = _customerRepository.findAll(spec, pageable);
-        var results = customers.map(customer -> _modelMapper.map(customer, CustomerResponseDto.class));
+        var customers = customerRepository.findAll(spec, pageable);
+        var results = customers.map(customer -> modelMapper.map(customer, CustomerResponseDto.class));
         return new PagedResponseDto<>(results);
     }
 }
