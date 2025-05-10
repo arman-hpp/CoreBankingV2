@@ -52,7 +52,6 @@ public class CustomerController {
     }
 
     @PostMapping
-    @ResponseStatus(HttpStatus.CREATED)
     @Operation(summary = "Add a new customer", description = "Create a new customer with the provided data")
     public ResponseEntity<CustomerResponseDto> addCustomer(
             @Valid @RequestBody final AddCustomerRequestDto addCustomerDto) {
