@@ -28,3 +28,4 @@ public class BusinessException extends RuntimeException {
         this.args = args != null ? args : new Object[0];
     }
 }
+

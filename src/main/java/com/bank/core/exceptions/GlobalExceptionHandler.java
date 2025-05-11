@@ -24,11 +24,25 @@ public class GlobalExceptionHandler {
         this.messageSource = messageSource;
     }
 
+    private HttpStatus getHttpStatusFromResourceKey(String resourceKey) {
+        if(resourceKey.contains(".notFound")) {
+            return HttpStatus.NOT_FOUND;
+        } else if(resourceKey.contains(".invalidData")) {
+            return HttpStatus.BAD_REQUEST;
+        } else if(resourceKey.contains(".noAccess")) {
+            return HttpStatus.FORBIDDEN;
+        } else if(resourceKey.contains(".dup")) {
+            return HttpStatus.CONFLICT;
+        }
+
+        return HttpStatus.UNPROCESSABLE_ENTITY;
+    }
+
     @ExceptionHandler(BusinessException.class)
     public ResponseEntity<ApiErrorResponse> handleBusinessException(BusinessException ex, Locale locale) {
         logger.warn("Business exception: {}", ex.getMessage(), ex);
         var message = messageSource.getMessage(ex.getResourceKey(), ex.getArgs(), locale);
-        return buildResponse("Business Error", message, HttpStatus.BAD_REQUEST);
+        return buildResponse("Business Error", message, getHttpStatusFromResourceKey(ex.getResourceKey()));
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
