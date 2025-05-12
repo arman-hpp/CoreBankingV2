@@ -28,14 +28,14 @@ public class CustomerController {
 
     @GetMapping
     @Operation(summary = "Retrieve all customers", description = "Fetches a paginated list of customers")
-    public PagedResponseDto<CustomerResponseDto> getAll(
+    public PagedResponseDto<CustomerResponseDto> list(
             @Valid @ModelAttribute PaginationRequestDto pagination) {
         return customerService.loadCustomers(pagination);
     }
 
     @GetMapping("/{id}")
     @Operation(summary = "Retrieve customer by ID", description = "Fetches a single customer by their ID")
-    public CustomerResponseDto getById(
+    public CustomerResponseDto findById(
             @PathVariable @Positive(message = "Customer ID must be positive")
             @Parameter(description = "ID of the customer", example = "1") Long id) {
         return customerService.loadCustomer(id);
@@ -43,7 +43,7 @@ public class CustomerController {
 
     @PostMapping("/filter")
     @Operation(summary = "Filter customers", description = "Fetches customers based on provided filter criteria")
-    public PagedResponseDto<CustomerResponseDto> filter(
+    public PagedResponseDto<CustomerResponseDto> findByFilter(
             @Valid @RequestBody FilterInfoDto filterInfo) {
         return customerService.loadCustomerByFilter(filterInfo);
     }
