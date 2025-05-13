@@ -9,8 +9,6 @@ import com.bank.customers.dtos.EditCustomerRequestDto;
 import com.bank.customers.services.CustomerService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;
@@ -30,11 +28,6 @@ public class CustomerController {
 
     @GetMapping
     @Operation(summary = "Retrieve all customers", description = "Fetches a paginated list of customers")
-//    @ApiResponses(value = {
-//            @ApiResponse(responseCode = "200", description = "موفقیت‌آمیز"),
-//            @ApiResponse(responseCode = "400", description = "درخواست نامعتبر"),
-//            @ApiResponse(responseCode = "500", description = "خطای سرور")
-//    })
     public PagedResponseDto<CustomerResponseDto> list(
             @Valid @ModelAttribute PaginationRequestDto pagination) {
         return customerService.loadCustomers(pagination);

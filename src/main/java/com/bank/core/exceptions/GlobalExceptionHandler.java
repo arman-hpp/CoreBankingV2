@@ -62,7 +62,7 @@ public class GlobalExceptionHandler {
                 error,
                 message,
                 status.value(),
-                LocalDateTime.now()
+                LocalDateTime.now().toString()
         );
         return ResponseEntity.status(status).body(response);
     }
