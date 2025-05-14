@@ -39,7 +39,7 @@ public class WebSecurityConfiguration {
                         .requestMatchers("/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
                         .requestMatchers("/api/test/**").permitAll()
                         .requestMatchers("/error/**").permitAll()
-                        .requestMatchers("/api/v1/**").permitAll()
+                        //.requestMatchers("/api/v1/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/auth/captcha").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/auth/login", "/api/auth/register", "/api/auth/refresh_token").permitAll()
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
