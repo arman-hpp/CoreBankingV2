@@ -1,4 +1,4 @@
-package com.bank.core.utils.annotations;
+package com.bank.core.annotations;
 
 import java.lang.annotation.*;
 

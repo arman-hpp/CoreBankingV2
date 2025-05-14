@@ -69,7 +69,7 @@ public class LoanService {
     }
 
     public List<LoanDto> loadLoansByCustomerId(Long customerId) {
-        var customerDto = _customerService.loadCustomer(customerId);
+        var customerDto = _customerService.getById(customerId);
         if(customerDto == null)
             throw new BusinessException("error.customer.notFound");
 

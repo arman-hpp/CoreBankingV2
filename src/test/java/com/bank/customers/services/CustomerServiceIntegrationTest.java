@@ -36,7 +36,7 @@ public class CustomerServiceIntegrationTest {
         dto.setLastName("Hasanpour");
         dto.setAddress("Iran, Mazandaran, Babol, Tohid 20");
 
-        var saved = customerService.addCustomer(dto);
+        var saved = customerService.create(dto);
 
         assertNotNull(saved.getId());
 

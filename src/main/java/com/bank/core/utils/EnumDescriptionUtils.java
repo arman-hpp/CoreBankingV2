@@ -1,11 +1,13 @@
-package com.bank.core.utils.annotations;
+package com.bank.core.utils;
+
+import com.bank.core.annotations.EnumDescription;
 
 import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.Map;
 
 @SuppressWarnings("unused")
-public class EnumDescriptionHelper {
+public class EnumDescriptionUtils {
     public static String GetEnumDescription(Enum<?> e) {
         try {
             Class<?> clazz = e.getClass();

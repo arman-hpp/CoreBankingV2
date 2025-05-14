@@ -1,5 +1,6 @@
 package com.bank.customers.controllers;
 
+import com.bank.core.annotations.ValidId;
 import com.bank.core.dtos.PagedResponseDto;
 import com.bank.core.dtos.PaginationRequestDto;
 import com.bank.core.dtos.filters.FilterInfoDto;
@@ -11,7 +12,6 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
@@ -28,24 +28,24 @@ public class CustomerController {
 
     @GetMapping
     @Operation(summary = "Retrieve all customers", description = "Fetches a paginated list of customers")
-    public PagedResponseDto<CustomerResponseDto> list(
+    public PagedResponseDto<CustomerResponseDto> getAll(
             @Valid @ModelAttribute PaginationRequestDto pagination) {
-        return customerService.loadCustomers(pagination);
+        return customerService.getAll(pagination);
     }
 
     @GetMapping("/{id}")
     @Operation(summary = "Retrieve customer by ID", description = "Fetches a single customer by their ID")
-    public CustomerResponseDto findById(
-            @PathVariable @Positive(message = "Customer ID must be positive")
+    public CustomerResponseDto getById(
+            @PathVariable @ValidId
             @Parameter(description = "ID of the customer", example = "1") Long id) {
-        return customerService.loadCustomer(id);
+        return customerService.getById(id);
     }
 
     @PostMapping("/filter")
     @Operation(summary = "Filter customers", description = "Fetches customers based on provided filter criteria")
-    public PagedResponseDto<CustomerResponseDto> findByFilter(
+    public PagedResponseDto<CustomerResponseDto> filter(
             @Valid @RequestBody FilterInfoDto filterInfo) {
-        return customerService.loadCustomerByFilter(filterInfo);
+        return customerService.filter(filterInfo);
     }
 
     @PostMapping
@@ -53,24 +53,24 @@ public class CustomerController {
     @Operation(summary = "Create a new customer", description = "Creates a new customer with the provided details")
     public CustomerResponseDto create(
             @Valid @RequestBody AddCustomerRequestDto addCustomerRequest) {
-        return customerService.addCustomer(addCustomerRequest);
+        return customerService.create(addCustomerRequest);
     }
 
     @PutMapping("/{id}")
     @Operation(summary = "Update an existing customer", description = "Updates an existing customer by their ID")
     public CustomerResponseDto update(
-            @PathVariable @Positive(message = "Customer ID must be positive")
+            @PathVariable @ValidId
             @Parameter(description = "ID of the customer to update", example = "1") Long id,
             @Valid @RequestBody EditCustomerRequestDto editCustomerRequest) {
-        return customerService.editCustomer(id, editCustomerRequest);
+        return customerService.update(id, editCustomerRequest);
     }
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @Operation(summary = "Delete customer", description = "Deletes a customer by their ID")
     public void delete(
-            @PathVariable @Positive(message = "Customer ID must be positive")
+            @PathVariable @ValidId
             @Parameter(description = "ID of the customer to delete", example = "1") Long id) {
-        customerService.removeCustomer(id);
+        customerService.delete(id);
     }
 }
