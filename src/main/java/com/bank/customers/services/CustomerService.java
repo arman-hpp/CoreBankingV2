@@ -23,6 +23,9 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class CustomerService {
+    private static final String CUSTOMER_PAGES_CACHE = "customer-pages";
+    private static final String CUSTOMER_BY_ID_CACHE = "customer-by-id";
+
     private final CustomerRepository customerRepository;
     private final ModelMapper modelMapper;
 
@@ -31,7 +34,7 @@ public class CustomerService {
         this.modelMapper = modelMapper;
     }
 
-    @Cacheable(value = "customers", key="'customers-page-'+#paginationDto.pageNumber + '-' + #paginationDto.pageSize")
+    @Cacheable(value = CUSTOMER_PAGES_CACHE)
     public PagedResponseDto<CustomerResponseDto> getAll(PaginationRequestDto paginationDto) {
         var pageable = PageRequest.of(paginationDto.getPageNumber(), paginationDto.getPageSize(), Sort.by(Sort.Direction.DESC, "Id"));
         var customerPage = customerRepository.findAll(pageable);
@@ -39,7 +42,7 @@ public class CustomerService {
         return new PagedResponseDto<>(customerDtoPage);
     }
 
-    @Cacheable(value = "customer", key = "#customerId")
+    @Cacheable(value = CUSTOMER_BY_ID_CACHE)
     public CustomerResponseDto getById(Long customerId) {
         var customer = customerRepository.findById(customerId)
                 .orElseThrow(() -> new BusinessException("error.customer.notFound"));
@@ -47,6 +50,7 @@ public class CustomerService {
         return modelMapper.map(customer, CustomerResponseDto.class);
     }
 
+    @Cacheable(value = CUSTOMER_PAGES_CACHE)
     public PagedResponseDto<CustomerResponseDto> filter(FilterInfoDto filterInfo) {
         var pageable = PageRequest.of(
                 filterInfo.getFilterPage().getPage(),
@@ -66,7 +70,7 @@ public class CustomerService {
         return new PagedResponseDto<>(customerDtoPage);
     }
 
-    @CacheEvict(value = "customers", allEntries = true)
+    @CacheEvict(value = CUSTOMER_PAGES_CACHE, allEntries = true)
     public CustomerResponseDto create(AddCustomerRequestDto customerDto) {
         var customer = modelMapper.map(customerDto, Customer.class);
         customerRepository.save(customer);
@@ -74,9 +78,9 @@ public class CustomerService {
     }
 
     @Caching(evict = {
-            @CacheEvict(value = "customers", allEntries = true)
+            @CacheEvict(value = CUSTOMER_PAGES_CACHE, allEntries = true)
     }, put = {
-            @CachePut(cacheNames = "customer", key = "#customerId")
+            @CachePut(cacheNames = CUSTOMER_BY_ID_CACHE)
     })
     public CustomerResponseDto update(Long customerId, EditCustomerRequestDto customerDto) {
         var customer = customerRepository.findById(customerId)
@@ -89,8 +93,8 @@ public class CustomerService {
     }
 
     @Caching(evict = {
-            @CacheEvict(value = "customers", allEntries = true),
-            @CacheEvict(cacheNames = "customer", key = "#customerId")
+            @CacheEvict(value = CUSTOMER_PAGES_CACHE, allEntries = true),
+            @CacheEvict(cacheNames = CUSTOMER_BY_ID_CACHE)
     })
     public void delete(Long customerId) {
         var customer = customerRepository.findById(customerId)

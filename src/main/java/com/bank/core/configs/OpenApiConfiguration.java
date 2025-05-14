@@ -22,7 +22,7 @@ import java.time.LocalDateTime;
  * Configures OpenAPI (Swagger) documentation for the CoreBanking API.
  */
 @Configuration
-public class OpenApiConfig {
+public class OpenApiConfiguration {
     /**
      * Defines the OpenAPI metadata, including title, version, and contact information.
      */
