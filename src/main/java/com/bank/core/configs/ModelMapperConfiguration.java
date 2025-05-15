@@ -2,9 +2,12 @@ package com.bank.core.configs;
 
 import com.bank.users.dtos.UserDto;
 import com.bank.users.models.User;
+import org.hibernate.Hibernate;
+import org.modelmapper.Condition;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.PropertyMap;
 import org.modelmapper.convention.MatchingStrategies;
+import org.modelmapper.spi.MappingContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -22,6 +25,13 @@ public class ModelMapperConfiguration {
             }
         });
         return mapper;
+    }
+
+    private static class HibernateInitializedCondition<S, D> implements Condition<S, D> {
+        @Override
+        public boolean applies(MappingContext<S, D> context) {
+            return Hibernate.isInitialized(context.getSource());
+        }
     }
 }
 

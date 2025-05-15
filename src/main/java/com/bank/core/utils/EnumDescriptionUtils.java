@@ -3,42 +3,84 @@ package com.bank.core.utils;
 import com.bank.core.annotations.EnumDescription;
 
 import java.lang.reflect.Field;
-import java.util.HashMap;
+import java.util.Collections;
 import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
+/**
+ * Utility class for extracting descriptions from enums annotated with @EnumDescription.
+ */
 @SuppressWarnings("unused")
-public class EnumDescriptionUtils {
-    public static String GetEnumDescription(Enum<?> e) {
+public final class EnumDescriptionUtils {
+    /**
+     * Retrieves the description of an enum constant from its @EnumDescription annotation.
+     *
+     * @param enumValue the enum constant, must not be null
+     * @return the description from @EnumDescription, or empty string if not found
+     * @throws IllegalArgumentException if enumValue is null
+     */
+    public static String getEnumDescription(Enum<?> enumValue) {
+        if (enumValue == null) {
+            throw new IllegalArgumentException("Enum value cannot be null");
+        }
+
+        return Optional.ofNullable(getEnumField(enumValue))
+                .filter(field -> field.isAnnotationPresent(EnumDescription.class))
+                .map(field -> field.getAnnotation(EnumDescription.class).value())
+                .orElse("");
+    }
+
+    /**
+     * Retrieves a map of all enum constants' ordinals to their @EnumDescription values.
+     *
+     * @param enumClass the enum class, must not be null and must be an enum
+     * @return an unmodifiable map of ordinal to description, empty if no descriptions found
+     * @throws IllegalArgumentException if enumClass is null or not an enum
+     */
+    public static Map<Integer, String> getEnumDescriptions(Class<?> enumClass) {
+        validateEnumClass(enumClass);
+
+        return Collections.unmodifiableMap(
+                Stream.of(enumClass.getFields())
+                        .filter(field -> field.isAnnotationPresent(EnumDescription.class))
+                        .collect(Collectors.toMap(
+                                EnumDescriptionUtils::getEnumOrdinal,
+                                EnumDescriptionUtils::getAnnotationValue,
+                                (v1, _) -> v1 // In case of duplicates, keep first
+                        ))
+        );
+    }
+
+    private static Field getEnumField(Enum<?> enumValue) {
         try {
-            Class<?> clazz = e.getClass();
-            Field field = clazz.getField(e.toString());
+            Field field = enumValue.getClass().getField(enumValue.name());
             field.setAccessible(true);
-            if (field.isAnnotationPresent(EnumDescription.class)) {
-                return field.getAnnotation(EnumDescription.class).value();
-            } else {
-                return "";
-            }
-        } catch (Exception ex) {
-            return "";
+            return field;
+        } catch (NoSuchFieldException e) {
+            return null;
         }
     }
 
-    public static Map<Integer, String> GetEnumDescriptions(Class<?> clazz) {
-        Map<Integer, String> enumElementsMap = new HashMap<>();
-        try {
-            for (Field field : clazz.getFields()) {
-                field.setAccessible(true);
-                if (field.isAnnotationPresent(EnumDescription.class)) {
-                    enumElementsMap.put(
-                            ((Enum<?>) field.get(null)).ordinal(),
-                            field.getAnnotation(EnumDescription.class).value()
-                    );
-                }
-            }
-
-            return enumElementsMap;
-        } catch (Exception ex) {
-            return new HashMap<>();
+    private static void validateEnumClass(Class<?> enumClass) {
+        if (enumClass == null) {
+            throw new IllegalArgumentException("Enum class cannot be null");
         }
+        if (!enumClass.isEnum()) {
+            throw new IllegalArgumentException("Class must be an enum: " + enumClass.getName());
+        }
+    }
+
+    private static Integer getEnumOrdinal(Field field) {
+        try {
+            return ((Enum<?>) field.get(null)).ordinal();
+        } catch (IllegalAccessException e) {
+            throw new IllegalStateException("Failed to access enum field: " + field.getName(), e);
+        }
+    }
+
+    private static String getAnnotationValue(Field field) {
+        return field.getAnnotation(EnumDescription.class).value();
     }
 }
