@@ -39,6 +39,10 @@ build/
 
 ### PVS Studio ###
 *.plog
+*.tasks
 *.pvsconfig
 *.PVS-Studio.*
+PVS-Studio.tasks
+PVS-Studio.report.*
 PVS-Studio_*.log
+PVS-Studio_*.html
