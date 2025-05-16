@@ -46,3 +46,4 @@ PVS-Studio.tasks
 PVS-Studio.report.*
 PVS-Studio_*.log
 PVS-Studio_*.html
+/.PVS-Studio/
