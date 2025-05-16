@@ -36,3 +36,9 @@ build/
 *.trace.db
 *.lock.db
 *.h2.db
+
+### PVS Studio ###
+*.plog
+*.pvsconfig
+*.PVS-Studio.*
+PVS-Studio_*.log
