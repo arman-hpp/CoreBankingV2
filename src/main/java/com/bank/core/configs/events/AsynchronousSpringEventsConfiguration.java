@@ -1,4 +1,4 @@
-package com.bank.core.configs;
+package com.bank.core.configs.events;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

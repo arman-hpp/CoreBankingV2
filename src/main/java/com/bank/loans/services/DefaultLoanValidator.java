@@ -4,7 +4,9 @@ import com.bank.core.exceptions.BusinessException;
 import com.bank.loans.dtos.LoanConditionsDto;
 import com.bank.loans.dtos.LoanDto;
 import com.bank.loans.services.interfaces.ILoanValidator;
+import org.springframework.stereotype.Component;
 
+@Component
 public class DefaultLoanValidator implements ILoanValidator {
     public void validate(LoanConditionsDto loanConditionsDto, LoanDto loanDto) {
         if (loanDto.getRefundDuration() < loanConditionsDto.getMinRefundDuration())

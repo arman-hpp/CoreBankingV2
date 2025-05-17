@@ -1,4 +1,4 @@
-package com.bank.core.configs;
+package com.bank.core.configs.security;
 
 import com.bank.users.repos.UserRepository;
 import org.springframework.context.annotation.Bean;

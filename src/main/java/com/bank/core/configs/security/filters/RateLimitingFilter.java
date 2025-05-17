@@ -1,4 +1,4 @@
-package com.bank.core.configs.filters;
+package com.bank.core.configs.security.filters;
 
 import io.github.bucket4j.Bandwidth;
 import io.github.bucket4j.Bucket;

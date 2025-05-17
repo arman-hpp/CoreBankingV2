@@ -1,4 +1,4 @@
-package com.bank.core.configs;
+package com.bank.core.configs.swagger;
 
 import com.bank.core.enums.ApiCommonResponses;
 import com.bank.core.exceptions.ApiErrorResponse;

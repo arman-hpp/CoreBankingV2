@@ -1,5 +1,8 @@
 package com.bank.core.exporters;
 
+import org.springframework.stereotype.Component;
+
+@Component
 public class ExporterFactory implements IExporterFactory{
     public IExporter CreateExporter(ExportTypes exportType) {
         if (exportType == ExportTypes.Excel) {

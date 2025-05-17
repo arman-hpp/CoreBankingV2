@@ -4,6 +4,7 @@ import com.bank.loans.dtos.LoanPaymentInfoDto;
 import com.bank.loans.dtos.InstallmentDto;
 import com.bank.loans.dtos.LoanDto;
 import com.bank.loans.services.interfaces.ILoanCalculator;
+import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -15,6 +16,7 @@ import java.util.Collections;
 /**
  * adapted from <a href="https://github.com/ArtyomPanfutov/loan-amortization-calculator">...</a>
  */
+@Component
 public class AmortizationLoanCalculator implements ILoanCalculator {
     public LoanPaymentInfoDto calculate(LoanDto loanDto) {
         var overPaidInterestAmount = BigDecimal.ZERO;

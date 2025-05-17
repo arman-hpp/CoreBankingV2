@@ -1,7 +1,7 @@
-package com.bank.core.configs;
+package com.bank.core.configs.security;
 
-import com.bank.core.configs.filters.JwtAuthenticationFilter;
-import com.bank.core.configs.filters.RateLimitingFilter;
+import com.bank.core.configs.security.filters.JwtAuthenticationFilter;
+import com.bank.core.configs.security.filters.RateLimitingFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
@@ -61,6 +61,7 @@ public class WebSecurityConfiguration {
 
                     requests.anyRequest().authenticated();
                 });
+
         if (environment.acceptsProfiles(Profiles.of("prod"))) {
             http.addFilterBefore(rateLimitingFilter, UsernamePasswordAuthenticationFilter.class);
         }

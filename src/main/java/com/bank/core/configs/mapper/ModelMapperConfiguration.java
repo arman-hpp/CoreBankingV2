@@ -1,4 +1,4 @@
-package com.bank.core.configs;
+package com.bank.core.configs.mapper;
 
 import com.bank.users.dtos.UserDto;
 import com.bank.users.models.User;

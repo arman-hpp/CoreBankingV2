@@ -1,4 +1,4 @@
-package com.bank.core.configs.filters;
+package com.bank.core.configs.security.filters;
 
 import com.bank.users.models.User;
 import com.bank.users.services.TokenService;

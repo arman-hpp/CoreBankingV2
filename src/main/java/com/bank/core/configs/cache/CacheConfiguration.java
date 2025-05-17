@@ -1,6 +1,6 @@
-package com.bank.core.configs;
+package com.bank.core.configs.cache;
 
-import com.bank.core.utils.CacheKeyGeneratorUtils;
+import com.bank.core.cache.CacheKeyGenerator;
 import org.springframework.cache.annotation.CachingConfigurer;
 import org.springframework.cache.interceptor.KeyGenerator;
 import org.springframework.context.annotation.Bean;
@@ -11,6 +11,6 @@ public class CacheConfiguration implements CachingConfigurer {
     @Override
     @Bean
     public KeyGenerator keyGenerator() {
-        return new CacheKeyGeneratorUtils();
+        return new CacheKeyGenerator();
     }
 }
