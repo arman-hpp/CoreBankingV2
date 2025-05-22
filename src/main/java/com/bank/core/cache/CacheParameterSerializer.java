@@ -49,7 +49,9 @@ public record CacheParameterSerializer(ObjectMapper objectMapper) {
     }
 
     private String serializePaginationDto(PaginationRequestDto paginationDto) {
-        return String.format("page=%d,size=%d", paginationDto.getPageNumber(), paginationDto.getPageSize());
+        return String.format("page=%d,size=%d,dir=%s,sort=%s",
+                paginationDto.getPageNumber(), paginationDto.getPageSize(),
+                paginationDto.getDirection(), paginationDto.getSortBy());
     }
 
     private String serializeFilterInfo(FilterInfoDto filterInfo) {
