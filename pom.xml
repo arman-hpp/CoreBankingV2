@@ -123,6 +123,11 @@
             <artifactId>postgresql</artifactId>
             <version>42.7.5</version>
         </dependency>
+        <dependency>
+            <groupId>org.flywaydb</groupId>
+            <artifactId>flyway-core</artifactId>
+            <version>11.8.2</version>
+        </dependency>
     </dependencies>
     <build>
         <plugins>
