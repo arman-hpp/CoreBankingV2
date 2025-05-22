@@ -11,6 +11,7 @@ import com.bank.customers.dtos.CustomerResponseDto;
 import com.bank.customers.dtos.EditCustomerRequestDto;
 import com.bank.customers.models.Customer;
 import com.bank.customers.repos.CustomerRepository;
+import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
@@ -22,17 +23,13 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 @Service
+@RequiredArgsConstructor
 public class CustomerService {
     private static final String CUSTOMER_PAGES_CACHE = "customer-pages";
     private static final String CUSTOMER_BY_ID_CACHE = "customer-by-id";
 
     private final CustomerRepository customerRepository;
     private final ModelMapper modelMapper;
-
-    public CustomerService(CustomerRepository customerRepository, ModelMapper modelMapper) {
-        this.customerRepository = customerRepository;
-        this.modelMapper = modelMapper;
-    }
 
     @Cacheable(value = CUSTOMER_PAGES_CACHE)
     public PagedResponseDto<CustomerResponseDto> getAll(PaginationRequestDto paginationDto) {
